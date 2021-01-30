@@ -26,6 +26,8 @@ class User:
     async def create(cls, email: str) -> Record:
         """ Creates new user. """
 
+        assert email != ''
+
         async with db.transaction():
             query = users.insert().values({ 'email': email })
             user_id = await db.execute(query)
