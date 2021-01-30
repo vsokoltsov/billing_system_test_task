@@ -1,4 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status, HTTPException
+
+import asyncpg
 
 from app.models.user import User
 from app.schemas.user import CreateUser, UserResponse
@@ -8,12 +10,15 @@ router = APIRouter(
     tags=["users"]
 )
 
-@router.post("/", response_model=UserResponse)
+@router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(params: CreateUser) -> UserResponse:
     """ Creates new user and its wallet. """
 
-    data = await User.create(params.email)
-    return UserResponse(**data).dict()
+    try:
+        data = await User.create(params.email)
+        return UserResponse(**data).dict()
+    except asyncpg.exceptions.UniqueViolationError:
+        raise HTTPException(status_code=400, detail="User with this email already exists.")
 
 @router.post("/enroll")
 async def enroll():

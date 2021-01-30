@@ -11,7 +11,11 @@ BASE_DIR = os.path.dirname(
 )
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
+app_env = os.environ.get('APP_ENV')
 DATABASE_URL = f'postgresql://{os.environ.get("POSTGRES_USER")}:{os.environ.get("POSTGRES_PASSWORD")}@{os.environ.get("DB_HOST")}:{os.environ.get("DB_PORT")}/{os.environ.get("POSTGRES_DB")}'
-db = Database(DATABASE_URL)
+if app_env == 'test':
+    db = Database(DATABASE_URL, force_rollback=True)
+else:
+    db = Database(DATABASE_URL)
 
 metadata = sqlalchemy.MetaData()

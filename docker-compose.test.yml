@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+
+  postgres_test:
+    container_name: db_test
+    image: postgres
+    env_file: .env.test
+    ports:
+      - 5433:5432
+    volumes:
+      - test_volume:/var/lib/postgresql
+
+volumes:
+  test_volume:

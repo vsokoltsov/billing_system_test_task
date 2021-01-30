@@ -14,10 +14,18 @@ fastapi-sqlalchemy = "*"
 pydantic = "*"
 psycopg2-binary = "*"
 psycopg2 = "*"
+email-validator = "*"
+pytest-cov = "*"
 
 [dev-packages]
 ipython = "*"
 ipdb = "*"
+pytest = "*"
+pytest-asyncio = "*"
+httpx = "*"
+asgi-lifespan = "*"
+factory-boy = "*"
+pytest-factoryboy = "*"
 
 [requires]
 python_version = "3.8"
