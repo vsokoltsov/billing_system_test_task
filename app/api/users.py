@@ -19,6 +19,8 @@ async def create_user(params: CreateUser) -> UserResponse:
         return UserResponse(**data).dict()
     except asyncpg.exceptions.UniqueViolationError:
         raise HTTPException(status_code=400, detail="User with this email already exists.")
+    except asyncpg.exceptions.NotNullViolationError:
+        raise HTTPException(status_code=400, detail="Error of wallet's creation.")
 
 @router.post("/enroll")
 async def enroll():

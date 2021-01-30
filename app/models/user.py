@@ -1,8 +1,10 @@
 import sqlalchemy as sa
+from sqlalchemy.sql import select
 
 from databases.backends.postgres import Record
 
 from app.db import db, metadata
+from app.models.wallet import wallets, Wallet
 
 users = sa.Table(
     "users",
@@ -18,7 +20,10 @@ class User:
     async def get(cls, user_id: int) -> Record:
         """ Return user record. """
 
-        query = users.select().where(users.c.id == user_id)
+        j = users.join(wallets, users.c.id == wallets.c.user_id)
+        query = select([
+            users.c.id, users.c.email, wallets.c.balance
+        ]).select_from(j)
         user = await db.fetch_one(query)
         return user
 
@@ -28,8 +33,13 @@ class User:
 
         assert email != ''
 
-        async with db.transaction():
-            query = users.insert().values({ 'email': email })
-            user_id = await db.execute(query)
+        async with db.transaction() as tr:
+            user_query = users.insert().values({ 'email': email })
+            user_id = await db.execute(user_query)
+            await Wallet.create(user_id)
             user = await cls.get(user_id)
+
+            # If user does not exists - rollback transaction
+            if not user:
+                await tr.rollback()
             return user
