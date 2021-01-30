@@ -7,8 +7,17 @@ name = "pypi"
 fastapi = "*"
 uvicorn = "*"
 python-dotenv = "*"
+alembic = "*"
+databases = "*"
+asyncpg = "*"
+fastapi-sqlalchemy = "*"
+pydantic = "*"
+psycopg2-binary = "*"
+psycopg2 = "*"
 
 [dev-packages]
+ipython = "*"
+ipdb = "*"
 
 [requires]
 python_version = "3.8"
