@@ -31,6 +31,7 @@ pytest-dotenv = "*"
 pylint = "*"
 mypy = "*"
 black = "*"
+sqlalchemy-stubs = "*"
 
 [requires]
 python_version = "3.8"

@@ -32,7 +32,7 @@ class WalletOperation:
     async def create(
         cls,
         operation: str,
-        amount: Decimal = 0,
+        amount: Decimal = Decimal(0),
         wallet_from: int = None,
         wallet_to: int = None,
     ) -> int:
@@ -46,7 +46,7 @@ class WalletOperation:
         :returns: ID of new SQL row
         """
 
-        operations_query = wallet_operations.insert(None).values(
+        operations_query = wallet_operations.insert().values(
             {
                 "operation": operation,
                 "wallet_from": wallet_from,

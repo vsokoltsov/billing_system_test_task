@@ -39,7 +39,7 @@ class Wallet:
         :returns: SQL row record
         """
 
-        wallet_query = wallets.insert(None).values({"user_id": user_id})
+        wallet_query = wallets.insert().values({"user_id": user_id})
         await WalletOperation.create(WalletOperation.CREATE)
         return await db.execute(wallet_query)
 
@@ -62,7 +62,7 @@ class Wallet:
 
         async with db.transaction():
             query = (
-                wallets.update(None)
+                wallets.update()
                 .where(wallets.c.id == wallet_id)
                 .values({"balance": wallets.c.balance + amount})
                 .returning(wallets.c.balance)
