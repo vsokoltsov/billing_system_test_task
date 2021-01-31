@@ -26,10 +26,7 @@ async def create_user(params: CreateUser) -> UserResponse:
         ) from unique_exception
     except asyncpg.exceptions.NotNullViolationError as not_null_exception:
         raise (
-            HTTPException(
-                status_code=400,
-                detail="Error of wallet's creation."
-            )
+            HTTPException(status_code=400, detail="Error of wallet's creation.")
         ) from not_null_exception
 
 

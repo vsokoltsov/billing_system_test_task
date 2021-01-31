@@ -7,6 +7,7 @@ from databases import Database
 from httpx import AsyncClient
 
 import alembic
+
 # pylint: disable=no-name-in-module
 from alembic.config import Config
 from app import app
@@ -29,6 +30,7 @@ async def connect_to_db():
     await db.connect()
     yield
     await db.disconnect()
+
 
 @pytest.fixture(scope="module", autouse=True)
 def apply_migrations_module():
@@ -96,8 +98,8 @@ async def client() -> AsyncClient:
     """ Cleint fixture for API tests. """
 
     async with AsyncClient(
-                app=app,
-                base_url="http://testserver",
-                headers={"Content-Type": "application/json"},
+        app=app,
+        base_url="http://testserver",
+        headers={"Content-Type": "application/json"},
     ) as client_data:
         yield client_data

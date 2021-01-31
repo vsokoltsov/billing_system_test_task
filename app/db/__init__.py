@@ -14,8 +14,8 @@ else:
 
 
 DATABASE_URL = (
-    f'postgresql://{os.environ.get("POSTGRES_USER")}:{os.environ.get("POSTGRES_PASSWORD")}'\
-    f'@{os.environ.get("DB_HOST")}:{os.environ.get("DB_PORT")}'\
+    f'postgresql://{os.environ.get("POSTGRES_USER")}:{os.environ.get("POSTGRES_PASSWORD")}'
+    f'@{os.environ.get("DB_HOST")}:{os.environ.get("DB_PORT")}'
     f'/{os.environ.get("POSTGRES_DB")}'
 )
 db = Database(DATABASE_URL)

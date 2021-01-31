@@ -30,12 +30,12 @@ class WalletOperation:
 
     @classmethod
     async def create(
-                cls,
-                operation: str,
-                amount: Decimal = 0,
-                wallet_from: int = None,
-                wallet_to: int = None,
-        ) -> int:
+        cls,
+        operation: str,
+        amount: Decimal = 0,
+        wallet_from: int = None,
+        wallet_to: int = None,
+    ) -> int:
         """
         Creates new wallet operation instance.
 
