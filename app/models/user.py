@@ -22,7 +22,10 @@ class User:
 
         j = users.join(wallets, users.c.id == wallets.c.user_id)
         query = select([
-            users.c.id, users.c.email, wallets.c.balance
+            users.c.id,
+            users.c.email,
+            wallets.c.id.label('wallet_id'),
+            wallets.c.balance,
         ]).select_from(j)
         user = await db.fetch_one(query)
         return user
