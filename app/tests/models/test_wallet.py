@@ -5,6 +5,7 @@ import asyncpg
 
 from app.models.user import User, users
 from app.models.wallet import Wallet, wallets, InsufficientFundsException
+from app.models.wallet_operations import WalletOperation
 
 @pytest.mark.asyncio
 async def test_success_wallet_enroll(test_db):
@@ -15,12 +16,25 @@ async def test_success_wallet_enroll(test_db):
     assert balance == Decimal(10)
 
 @pytest.mark.asyncio
-async def test_success_wallet_enroll_with_negative_value(test_db):
-    """ Test success wallet enroll with negative value. """
+async def test_track_transaction_creation(test_db):
+    """ Test success transaction creation on success enroll. """
 
     user = await User.create("example@mail.com")
-    balance = await Wallet.enroll(user.get('wallet_id'), -10)
-    assert balance == Decimal(-10)
+    await Wallet.enroll(user.get('wallet_id'), 10)
+
+    query = "select wallet_to, operation, amount from wallet_operations"
+    data = await test_db.fetch_all(query)
+
+    assert dict(data[0]).get('operation') == WalletOperation.CREATE  
+    assert dict(data[1]).get('operation') == WalletOperation.RECEIPT
+
+@pytest.mark.asyncio
+async def test_failed_wallet_enroll_with_negative_value(test_db):
+    """ Test failed wallet enroll with negative value. """
+
+    user = await User.create("example@mail.com")
+    with pytest.raises(AssertionError):
+        await Wallet.enroll(user.get('wallet_id'), -10)
 
 @pytest.mark.asyncio
 async def test_failed_wallet_enroll(test_db):
@@ -28,7 +42,6 @@ async def test_failed_wallet_enroll(test_db):
 
     balance = await Wallet.enroll(1, 10)
     assert balance is None
-    
 
 @pytest.mark.asyncio
 async def test_failed_wallet_enroll_with_zero_value(test_db):
@@ -43,7 +56,7 @@ async def test_failed_wallet_enroll_with_wrong_type(test_db):
     """ Test failed wallet enroll (amount has wrong type). """
 
     user = await User.create("example@mail.com")
-    with pytest.raises(asyncpg.exceptions.DataError):
+    with pytest.raises(ValueError):
         await Wallet.enroll(user.get('wallet_id'), 'abc')
 
 @pytest.mark.asyncio
@@ -89,6 +102,41 @@ async def test_success_transfer_amount(test_db):
 
     assert new_user_data_1.get('balance') == 50
     assert new_user_data_2.get('balance') == 150
+
+@pytest.mark.asyncio
+async def test_success_transfer_amount_transactions_creation(test_db):
+    """ Test success transactions creations after transfer. """
+
+    user_1 = await User.create("example_1@mail.com")
+    user_2 = await User.create("example_2@mail.com")
+
+    balance_1 = await Wallet.enroll(user_1.get('wallet_id'), 100)
+    balance_2 = await Wallet.enroll(user_2.get('wallet_id'), 100)
+
+    user_data_1 = dict(user_1)
+    user_data_2 = dict(user_2)
+
+    user_data_1['balance'] = balance_1
+    user_data_2['balance'] = balance_2
+
+    await Wallet.transfer(user_data_1.get('wallet_id'), user_data_2.get('wallet_id'), 50)
+
+    query = "select wallet_from, wallet_to, operation, amount, created_at from wallet_operations"
+    operations = await test_db.fetch_all(query)
+
+    operations = [dict(op) for op in operations]
+    moving_funds = [op for op in operations if op.get('operation') in (WalletOperation.RECEIPT, WalletOperation.DEBIT)]
+
+    debit = moving_funds[-2]
+    receipt = moving_funds[-1]
+
+    assert debit['operation'] == WalletOperation.DEBIT
+    assert debit['wallet_from'] == user_data_1.get('wallet_id')
+    assert debit['wallet_to'] == user_data_2.get('wallet_id')
+
+    assert receipt['operation'] == WalletOperation.RECEIPT
+    assert receipt['wallet_from'] == user_data_2.get('wallet_id')
+    assert receipt['wallet_to'] == user_data_1.get('wallet_id')
 
 
 @pytest.mark.asyncio

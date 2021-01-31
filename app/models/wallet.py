@@ -1,9 +1,10 @@
 import sqlalchemy as sa
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from databases.backends.postgres import Record
 
 from app.db import db, metadata
+from app.models.wallet_operations import WalletOperation
 
 wallets = sa.Table(
     "wallets",
@@ -28,6 +29,7 @@ class Wallet:
         """
 
         wallet_query = wallets.insert().values({'user_id': user_id})
+        await WalletOperation.create(WalletOperation.CREATE)
         return await db.execute(wallet_query)
 
     @classmethod
@@ -39,8 +41,13 @@ class Wallet:
         :param amount: Number that need to be applied for wallet's balance.
         :returns: Balance decimal value
         """
-
-        assert amount != 0
+        
+        try:
+            Decimal(amount)
+        except InvalidOperation as wrong_type:
+            raise ValueError("Wrong type of 'amount' field") from wrong_type
+    
+        assert amount > 0, "amount should be positive"
 
         async with db.transaction():
             query = (
@@ -51,6 +58,11 @@ class Wallet:
                 .returning(wallets.c.balance)
             )
             balance = await db.execute(query)
+            await WalletOperation.create(
+                WalletOperation.RECEIPT,
+                amount,
+                wallet_to=wallet_id,
+            )
             return balance
 
     @classmethod
@@ -102,5 +114,19 @@ class Wallet:
             )
             await db.execute(source_query)
             await db.execute(target_query)
+
+            await WalletOperation.create(
+                WalletOperation.DEBIT,
+                amount,
+                wallet_from=wallet_from,
+                wallet_to=wallet_to,
+            )
+            await WalletOperation.create(
+                WalletOperation.RECEIPT,
+                amount,
+                wallet_from=wallet_to,
+                wallet_to=wallet_from,
+            )
+
             return wallet_to
             

@@ -5,6 +5,7 @@ from databases.backends.postgres import Record
 
 from app.db import db, metadata
 from app.models.wallet import wallets, Wallet
+from app.models.wallet_operations import WalletOperation
 
 users = sa.Table(
     "users",
@@ -20,6 +21,7 @@ class User:
     async def get(cls, user_id: int) -> Record:
         """ Return user record. """
 
+        # async with db.transaction():
         j = users.join(wallets, users.c.id == wallets.c.user_id, isouter=True)
         query = select([
             users.c.id,
@@ -28,6 +30,11 @@ class User:
             wallets.c.balance,
         ]).select_from(j).where(users.c.id == user_id)
         user = await db.fetch_one(query)
+        # await WalletOperation.create(
+        #     WalletOperation.RETRIEVE,
+        #     user.get('balance'),
+        #     user.get('wallet_id'),
+        # )
         return user
 
     @classmethod

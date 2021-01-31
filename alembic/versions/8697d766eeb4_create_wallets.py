@@ -24,9 +24,7 @@ def upgrade():
         sa.Column('user_id', sa.Integer, sa.ForeignKey('users.id', ondelete="cascade"), nullable=False, unique=True),
         sa.Column('balance', sa.Numeric(10, 2, decimal_return_scale=2, asdecimal=True), nullable=False, server_default='0')
     )
-    # op.add_column('users', sa.Column('wallet_id', sa.Integer, nullable=False)),
 
 
 def downgrade():
     op.drop_table("wallets")
-    # op.drop_column("users", "wallet_id")
