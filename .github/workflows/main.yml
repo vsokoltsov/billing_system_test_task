@@ -49,12 +49,14 @@ jobs:
             POSTGRES_PASSWORD=password
           """ > .env.test
 
-      - name: Build test database
-        run: docker-compose up -d -f docker-compose.test.yml
+      # - name: Build test database
+      #   run: docker-compose up -d -f docker-compose.test.yml
 
       # - name: Run application in container
       #   run: docker-compose up -d billing_app
 
       # Runs a set of commands using the runners shell
       - name: Run tests
-        run: docker-compose run billing_app bash -c "pytest -v -s"
+        run: |
+          docker-compose up -d -f docker-compose.test.yml
+          docker-compose run billing_app bash -c "pytest -v -s"
