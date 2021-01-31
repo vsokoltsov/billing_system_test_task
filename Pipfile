@@ -26,6 +26,7 @@ httpx = "*"
 asgi-lifespan = "*"
 factory-boy = "*"
 pytest-factoryboy = "*"
+pytest-dotenv = "*"
 
 [requires]
 python_version = "3.8"

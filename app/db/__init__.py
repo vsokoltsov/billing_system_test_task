@@ -9,13 +9,15 @@ BASE_DIR = os.path.dirname(
         os.path.dirname(os.path.abspath(__file__))
     )
 )
-load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 app_env = os.environ.get('APP_ENV')
-DATABASE_URL = f'postgresql://{os.environ.get("POSTGRES_USER")}:{os.environ.get("POSTGRES_PASSWORD")}@{os.environ.get("DB_HOST")}:{os.environ.get("DB_PORT")}/{os.environ.get("POSTGRES_DB")}'
 if app_env == 'test':
-    db = Database(DATABASE_URL, force_rollback=True)
+    load_dotenv(os.path.join(BASE_DIR, ".env.test"), verbose=True)
+    DATABASE_URL = f'postgresql://{os.environ.get("POSTGRES_USER")}:{os.environ.get("POSTGRES_PASSWORD")}@{os.environ.get("DB_HOST")}:{os.environ.get("DB_PORT")}/{os.environ.get("POSTGRES_DB")}'
+    db = Database(DATABASE_URL)
 else:
+    load_dotenv(os.path.join(BASE_DIR, ".env"))
+    DATABASE_URL = f'postgresql://{os.environ.get("POSTGRES_USER")}:{os.environ.get("POSTGRES_PASSWORD")}@{os.environ.get("DB_HOST")}:{os.environ.get("DB_PORT")}/{os.environ.get("POSTGRES_DB")}'
     db = Database(DATABASE_URL)
 
 metadata = sqlalchemy.MetaData()

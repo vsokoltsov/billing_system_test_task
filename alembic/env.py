@@ -11,7 +11,6 @@ from alembic import context
 from app.db import DATABASE_URL, metadata
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-load_dotenv(os.path.join(BASE_DIR, ".env"))
 sys.path.append(BASE_DIR)
 
 # this is the Alembic Config object, which provides
