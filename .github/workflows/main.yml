@@ -59,4 +59,5 @@ jobs:
       - name: Run tests
         run: |
           docker-compose up -d -f docker-compose.test.yml
-          docker-compose run billing_app bash -c "pytest -v -s"
+          echo $(docker ps -a)
+          docker-compose run billing_app bash -c "pytest"
