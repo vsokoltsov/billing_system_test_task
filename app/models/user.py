@@ -26,7 +26,7 @@ class User:
             users.c.email,
             wallets.c.id.label('wallet_id'),
             wallets.c.balance,
-        ]).select_from(j)
+        ]).select_from(j).where(users.c.id == user_id)
         user = await db.fetch_one(query)
         return user
 
