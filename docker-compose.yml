@@ -2,13 +2,30 @@ version: "3.9"
 
 services:
 
+  billing_app:
+    build: .
+    container_name: billing_app
+    command: uvicorn app:app --port 8000 --host 0.0.0.0 --reload
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+    depends_on:
+      - postgres
+    networks:
+      - dev
+      - test
+
   postgres:
     image: postgres
+    container_name: billing_db
     env_file: .env
     ports:
       - 5432:5432
     volumes:
       - dev_volume:/var/lib/postgresql
+    networks:
+      - dev
 
   pgadmin:
     container_name: pgadmin
@@ -18,6 +35,14 @@ services:
       - "5050:80"
     depends_on:
       - postgres
+    networks:
+      - dev
 
 volumes:
   dev_volume:
+
+networks:
+  dev:
+    name: dev
+  test:
+    name: test
