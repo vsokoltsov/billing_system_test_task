@@ -31,6 +31,27 @@ class User:
         return user
 
     @classmethod
+    async def get_by_wallet_id(cls, wallet_id: int) -> Record:
+        """
+        Return user record based on wallet id.
+
+        :params user_id: ID of wallet
+        :returns: SQL row record
+        """
+
+        j = users.join(wallets, users.c.id == wallets.c.user_id, isouter=True)
+        query = select([
+            users.c.id,
+            users.c.email,
+            wallets.c.id.label('wallet_id'),
+            wallets.c.balance,
+        ]).select_from(j).where(wallets.c.id == wallet_id)
+        user = await db.fetch_one(query)
+        return user
+
+
+
+    @classmethod
     async def create(cls, email: str) -> Record:
         """ Creates new user. """
 

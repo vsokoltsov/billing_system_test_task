@@ -141,3 +141,31 @@ async def test_failed_transfer_amount_negative_value(test_db):
 
     assert new_user_data_1.get('balance') == 100
     assert new_user_data_2.get('balance') == 100
+
+
+@pytest.mark.asyncio
+async def test_failed_transfer_amount_wallets_are_equal(test_db):
+    """
+    Test failed transfer amoung users' wallets (wallets are equal).
+    """
+
+    user_1 = await User.create("example_1@mail.com")
+    user_2 = await User.create("example_2@mail.com")
+
+    balance_1 = await Wallet.enroll(user_1.get('wallet_id'), 100)
+    balance_2 = await Wallet.enroll(user_2.get('wallet_id'), 100)
+
+    user_data_1 = dict(user_1)
+    user_data_2 = dict(user_2)
+
+    user_data_1['balance'] = balance_1
+    user_data_2['balance'] = balance_2
+
+    with pytest.raises(AssertionError):
+        await Wallet.transfer(user_data_1.get('wallet_id'), user_data_1.get('wallet_id'), 50)
+
+    new_user_data_1 = await User.get(user_data_1.get('id'))
+    new_user_data_2 = await User.get(user_data_2.get('id'))
+
+    assert new_user_data_1.get('balance') == 100
+    assert new_user_data_2.get('balance') == 100

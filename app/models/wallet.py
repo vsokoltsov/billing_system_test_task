@@ -66,24 +66,25 @@ class Wallet:
         return await db.fetch_one(wallet_query)
 
     @classmethod
-    async def transfer(cls, wallet_from: int, wallet_to: int, amount: Decimal) -> Decimal:
+    async def transfer(cls, wallet_from: int, wallet_to: int, amount: Decimal) -> int:
         """
         Transfer amount of currency between wallets.
 
         :param wallet_from: ID of source wallet
         :param wallet_to: ID of wallet recepients
         :param amount: Amount of currency
-        :returns: Balance decimal value
+        :returns: Source wallet id
         """
 
-        assert amount > 0
+        assert amount > 0, "amount must be positive"
+        assert wallet_from != wallet_to, "wallet source and target must be different"
 
         async with db.transaction():
             # Get source wallet data
             get_source_query = wallets.select().where(wallets.c.id == wallet_from)
             source_wallet = await db.fetch_one(get_source_query)
             if source_wallet.get('balance') < amount:
-                raise InsufficientFundsException("Source wallet does not have enough funds.")
+                raise InsufficientFundsException("Source wallet does not have enough funcds.")
 
             # Update wallets information for both source and target
             source_query = (
@@ -91,7 +92,7 @@ class Wallet:
                 .update()
                 .where(wallets.c.id == wallet_from)
                 .values({ 'balance': wallets.c.balance - amount })
-                .returning(wallets.c.balance)
+                # .returning(wallets.c.id, wallets.c.balance)
             )
             target_query = (
                 wallets
@@ -99,7 +100,7 @@ class Wallet:
                 .where(wallets.c.id == wallet_to)
                 .values({ 'balance': wallets.c.balance + amount })
             )
-            balance = await db.execute(source_query)
+            await db.execute(source_query)
             await db.execute(target_query)
-            return balance
+            return wallet_to
             
