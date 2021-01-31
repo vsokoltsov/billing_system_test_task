@@ -9,8 +9,12 @@ app.include_router(wallet.router, prefix="/api")
 
 @app.on_event("startup")
 async def startup():
+    """ Connect to the database. """
+
     await db.connect()
 
 @app.on_event("shutdown")
 async def shutdown():
+    """ Close connection to the database. """
+
     await db.disconnect()

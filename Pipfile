@@ -27,6 +27,12 @@ asgi-lifespan = "*"
 factory-boy = "*"
 pytest-factoryboy = "*"
 pytest-dotenv = "*"
+pylint = "*"
+mypy = "*"
+black = "*"
 
 [requires]
 python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true
