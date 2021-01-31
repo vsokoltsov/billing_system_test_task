@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from pydantic import BaseModel
 from pydantic import EmailStr
 
@@ -7,6 +9,5 @@ class CreateUser(BaseModel):
 class UserResponse(BaseModel):
     id: int
     email: EmailStr
-
-    class Config:
-        orm_mode = True
+    wallet_id: int
+    balance: Decimal

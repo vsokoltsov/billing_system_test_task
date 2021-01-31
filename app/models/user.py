@@ -20,7 +20,7 @@ class User:
     async def get(cls, user_id: int) -> Record:
         """ Return user record. """
 
-        j = users.join(wallets, users.c.id == wallets.c.user_id)
+        j = users.join(wallets, users.c.id == wallets.c.user_id, isouter=True)
         query = select([
             users.c.id,
             users.c.email,
