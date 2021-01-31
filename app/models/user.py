@@ -5,7 +5,6 @@ from databases.backends.postgres import Record
 
 from app.db import db, metadata
 from app.models.wallet import wallets, Wallet
-from app.models.wallet_operations import WalletOperation
 
 users = sa.Table(
     "users",
@@ -16,10 +15,16 @@ users = sa.Table(
 )
 
 class User:
+    """ Operations for user table. """
 
     @classmethod
     async def get(cls, user_id: int) -> Record:
-        """ Return user record. """
+        """
+        Return user record.
+
+        :param user_id: ID of user
+        :returns: SQL row record
+        """
 
         # async with db.transaction():
         j = users.join(wallets, users.c.id == wallets.c.user_id, isouter=True)
@@ -30,11 +35,6 @@ class User:
             wallets.c.balance,
         ]).select_from(j).where(users.c.id == user_id)
         user = await db.fetch_one(query)
-        # await WalletOperation.create(
-        #     WalletOperation.RETRIEVE,
-        #     user.get('balance'),
-        #     user.get('wallet_id'),
-        # )
         return user
 
     @classmethod
@@ -60,17 +60,22 @@ class User:
 
     @classmethod
     async def create(cls, email: str) -> Record:
-        """ Creates new user. """
+        """
+        Creates new user.
+
+        :param email: User's email
+        :returns: SQL row record
+        """
 
         assert email != ''
 
-        async with db.transaction() as tr:
-            user_query = users.insert().values({ 'email': email })
+        async with db.transaction() as transaction:
+            user_query = users.insert(None).values({ 'email': email })
             user_id = await db.execute(user_query)
             await Wallet.create(user_id)
             user = await cls.get(user_id)
 
             # If user does not exists - rollback transaction
             if not user:
-                await tr.rollback()
+                await transaction.rollback()
             return user
