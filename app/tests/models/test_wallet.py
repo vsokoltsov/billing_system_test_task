@@ -95,11 +95,12 @@ async def test_success_transfer_amount(test_db):
     user_data_1['balance'] = balance_1
     user_data_2['balance'] = balance_2
 
-    await Wallet.transfer(user_data_1.get('wallet_id'), user_data_2.get('wallet_id'), 50)
+    wallet_from_id = await Wallet.transfer(user_data_1.get('wallet_id'), user_data_2.get('wallet_id'), 50)
 
     new_user_data_1 = await User.get(user_data_1.get('id'))
     new_user_data_2 = await User.get(user_data_2.get('id'))
 
+    assert wallet_from_id == user_data_1.get('wallet_id')
     assert new_user_data_1.get('balance') == 50
     assert new_user_data_2.get('balance') == 150
 
