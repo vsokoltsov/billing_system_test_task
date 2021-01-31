@@ -106,7 +106,6 @@ class Wallet:
                 .update(None)
                 .where(wallets.c.id == wallet_from)
                 .values({ 'balance': wallets.c.balance - amount })
-                # .returning(wallets.c.id, wallets.c.balance)
             )
             target_query = (
                 wallets
@@ -130,5 +129,5 @@ class Wallet:
                 wallet_to=wallet_from,
             )
 
-            return wallet_to
+            return wallet_from
             
