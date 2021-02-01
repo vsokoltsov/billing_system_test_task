@@ -15,8 +15,6 @@ pydantic = "*"
 psycopg2-binary = "*"
 psycopg2 = "*"
 email-validator = "*"
-pytest-cov = "*"
-isort = "*"
 
 [dev-packages]
 ipython = "*"
@@ -32,6 +30,8 @@ pylint = "*"
 mypy = "*"
 black = "*"
 sqlalchemy-stubs = "*"
+pytest-cov = "*"
+isort = "*"
 
 [requires]
 python_version = "3.8"
