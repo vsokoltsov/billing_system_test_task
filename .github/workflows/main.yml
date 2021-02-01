@@ -16,6 +16,7 @@ jobs:
         run: |
           echo """
             POSTGRES_DB=billing
+            PGDATA=/var/lib/postgresql/data/billing_app
             POSTGRES_USER=user
             POSTGRES_PASSWORD=password
             DB_HOST=postgres
@@ -30,6 +31,7 @@ jobs:
           echo """
             APP_ENV=test
             POSTGRES_DB=billing_test
+            PGDATA=/var/lib/postgresql/data/billing_app_test
             DB_HOST=postgres_test
             DB_PORT=5432
             POSTGRES_USER=user
@@ -39,5 +41,5 @@ jobs:
       - name: Run tests
         run: |
           docker-compose -f docker-compose.test.yml up -d
-          echo $(docker ps -a)
+          docker ps -a
           docker-compose run billing_app bash -c "pytest"
