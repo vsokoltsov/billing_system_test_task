@@ -1,3 +1,5 @@
+from typing import AsyncGenerator
+
 import asyncio
 import os
 import warnings
@@ -94,7 +96,7 @@ def test_db() -> Database:
 
 
 @pytest.fixture
-async def client() -> AsyncClient:
+async def client() -> AsyncGenerator:
     """ Cleint fixture for API tests. """
 
     async with AsyncClient(

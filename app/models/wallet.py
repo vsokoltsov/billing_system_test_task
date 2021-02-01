@@ -107,8 +107,10 @@ class Wallet:
             # Get source wallet data
             get_source_query = wallets.select().where(wallets.c.id == wallet_from)
             source_wallet = await db.fetch_one(get_source_query)
+            if source_wallet is None:
+                raise ValueError("Wallet does not exists")
 
-            if source_wallet is not None and source_wallet.get("balance") < amount:
+            if source_wallet.get("balance", 0) < amount:
                 raise InsufficientFundsException(
                     "Source wallet does not have enough funcds."
                 )

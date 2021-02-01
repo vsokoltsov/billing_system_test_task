@@ -1,5 +1,5 @@
+from typing import Optional, Mapping, Any
 import sqlalchemy as sa
-from databases.backends.postgres import Record
 from sqlalchemy.sql import select
 
 from app.db import db, metadata, REPEATABLE_READ, SERIALIZABLE
@@ -18,7 +18,7 @@ class User:
     """ Operations for user table. """
 
     @classmethod
-    async def get(cls, user_id: int) -> Record:
+    async def get(cls, user_id: int) -> Optional[Mapping[str, Any]]:
         """
         Return user record.
 
@@ -43,7 +43,7 @@ class User:
         return user
 
     @classmethod
-    async def get_by_wallet_id(cls, wallet_id: int) -> Record:
+    async def get_by_wallet_id(cls, wallet_id: int) -> Optional[Mapping[str, str]]:
         """
         Return user record based on wallet id.
 
@@ -68,7 +68,7 @@ class User:
             return user
 
     @classmethod
-    async def create(cls, email: str) -> Record:
+    async def create(cls, email: str) -> Optional[Mapping[str, str]]:
         """
         Creates new user.
 
@@ -79,7 +79,7 @@ class User:
         assert email != ""
 
         async with db.transaction(isolation=SERIALIZABLE) as transaction:
-            user_query = users.insert(None).values({"email": email})
+            user_query = users.insert().values({"email": email})
             user_id = await db.execute(user_query)
             await Wallet.create(user_id)
             user = await cls.get(user_id)

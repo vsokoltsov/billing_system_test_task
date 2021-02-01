@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, HTTPException, status
 
 from app.models.user import User
 from app.models.wallet import Wallet
@@ -16,4 +16,6 @@ async def transfer(params: WalletTransferParams):
         params.wallet_from, params.wallet_to, params.amount
     )
     user = await User.get_by_wallet_id(wallet_id)
+    if not user:
+        raise HTTPException(404, detail="User does not exists")
     return UserResponse(**user).dict()
