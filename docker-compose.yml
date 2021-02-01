@@ -24,6 +24,7 @@ services:
       - 5432:5432
     volumes:
       - dev_volume:/var/lib/postgresql
+      - ./postgresql.conf:/var/lib/postgresql/data/postgresql.conf
     networks:
       - dev
 
