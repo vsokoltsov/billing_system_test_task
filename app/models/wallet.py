@@ -1,3 +1,5 @@
+from typing import Optional, Mapping, Any
+
 from decimal import Decimal, InvalidOperation
 
 import sqlalchemy as sa
@@ -38,10 +40,10 @@ class Wallet:
         :params user_id: ID of user
         :returns: SQL row record
         """
-
-        wallet_query = wallets.insert().values({"user_id": user_id})
-        await WalletOperation.create(WalletOperation.CREATE)
-        return await db.execute(wallet_query)
+        async with db.transaction():
+            wallet_query = wallets.insert().values({"user_id": user_id})
+            await WalletOperation.create(WalletOperation.CREATE)
+            return await db.execute(wallet_query)
 
     @classmethod
     async def enroll(cls, wallet_id: int, amount: Decimal) -> Decimal:
@@ -76,7 +78,7 @@ class Wallet:
             return balance
 
     @classmethod
-    async def get_by_user_id(cls, user_id: int) -> Record:
+    async def get_by_user_id(cls, user_id: int) -> Optional[Mapping[Any, Any]]:
         """
         Retrieve wallet row record by user_id value.
 
@@ -105,7 +107,8 @@ class Wallet:
             # Get source wallet data
             get_source_query = wallets.select().where(wallets.c.id == wallet_from)
             source_wallet = await db.fetch_one(get_source_query)
-            if source_wallet.get("balance") < amount:
+
+            if source_wallet is not None and source_wallet.get("balance") < amount:
                 raise InsufficientFundsException(
                     "Source wallet does not have enough funcds."
                 )
