@@ -1,8 +1,7 @@
-from typing import AsyncGenerator
-
 import asyncio
 import os
 import warnings
+from typing import AsyncGenerator
 
 import pytest
 from databases import Database

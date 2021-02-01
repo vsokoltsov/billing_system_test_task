@@ -1,8 +1,9 @@
-from typing import Optional, Mapping, Any
+from typing import Any, Mapping, Optional
+
 import sqlalchemy as sa
 from sqlalchemy.sql import select
 
-from app.db import db, metadata, REPEATABLE_READ, SERIALIZABLE
+from app.db import REPEATABLE_READ, SERIALIZABLE, db, metadata
 from app.models.wallet import Wallet, wallets
 
 users = sa.Table(
@@ -18,7 +19,9 @@ class User:
     """ Operations for user table. """
 
     @classmethod
-    async def get(cls, user_id: int) -> Optional[Mapping[str, Any]]:
+    async def get(
+        cls, user_id: int
+    ) -> Optional[Mapping[str, Any]]:  # pylint disable=unsubscriptable-object
         """
         Return user record.
 
@@ -34,6 +37,7 @@ class User:
                     users.c.email,
                     wallets.c.id.label("wallet_id"),
                     wallets.c.balance,
+                    wallets.c.currency,
                 ]
             )
             .select_from(j)
@@ -43,7 +47,9 @@ class User:
         return user
 
     @classmethod
-    async def get_by_wallet_id(cls, wallet_id: int) -> Optional[Mapping[str, str]]:
+    async def get_by_wallet_id(
+        cls, wallet_id: int
+    ) -> Optional[Mapping[str, str]]:  # pylint disable=unsubscriptable-object
         """
         Return user record based on wallet id.
 
@@ -68,7 +74,9 @@ class User:
             return user
 
     @classmethod
-    async def create(cls, email: str) -> Optional[Mapping[str, str]]:
+    async def create(
+        cls, email: str
+    ) -> Optional[Mapping[str, str]]:  # pylint disable=unsubscriptable-object
         """
         Creates new user.
 

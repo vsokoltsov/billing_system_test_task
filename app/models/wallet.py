@@ -1,11 +1,11 @@
-from typing import Optional, Mapping, Any
-
 from decimal import Decimal, InvalidOperation
+from typing import Any, Mapping, Optional
 
 import sqlalchemy as sa
 from databases.backends.postgres import Record
+from sqlalchemy.dialects import postgresql
 
-from app.db import db, metadata, SERIALIZABLE, REPEATABLE_READ
+from app.db import REPEATABLE_READ, SERIALIZABLE, db, metadata
 from app.models.wallet_operations import WalletOperation
 
 wallets = sa.Table(
@@ -21,6 +21,12 @@ wallets = sa.Table(
     ),
     sa.Column(
         "balance", sa.Numeric(10, 2, asdecimal=True), nullable=False, server_default="0"
+    ),
+    sa.Column(
+        "currency",
+        postgresql.ENUM("USD", name="currency_enum", create_type=False),
+        server_default="USD",
+        nullable=False,
     ),
 )
 
@@ -71,9 +77,7 @@ class Wallet:
             )
             balance = await db.execute(query)
             await WalletOperation.create(
-                WalletOperation.RECEIPT,
-                amount,
-                wallet_to=wallet_id,
+                WalletOperation.RECEIPT, amount, wallet_to=wallet_id,
             )
             return balance
 
