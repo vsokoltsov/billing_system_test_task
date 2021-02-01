@@ -1,12 +1,20 @@
+import enum
+
 from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping, Optional
 
 import sqlalchemy as sa
 from databases.backends.postgres import Record
-from sqlalchemy.dialects import postgresql
 
 from app.db import REPEATABLE_READ, SERIALIZABLE, db, metadata
 from app.models.wallet_operations import WalletOperation
+
+
+class CurrencyEnum(enum.Enum):
+    """ Enum for currencies. """
+
+    USD = "USD"
+
 
 wallets = sa.Table(
     "wallets",
@@ -23,10 +31,7 @@ wallets = sa.Table(
         "balance", sa.Numeric(10, 2, asdecimal=True), nullable=False, server_default="0"
     ),
     sa.Column(
-        "currency",
-        postgresql.ENUM("USD", name="currency_enum", create_type=False),
-        server_default="USD",
-        nullable=False,
+        "currency", sa.String, server_default=CurrencyEnum.USD.value, nullable=False
     ),
 )
 

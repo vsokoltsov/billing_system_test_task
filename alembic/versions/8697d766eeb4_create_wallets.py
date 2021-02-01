@@ -8,7 +8,7 @@ Create Date: 2021-01-31 00:27:48.971118
 from alembic import op
 import sqlalchemy as sa
 from decimal import Decimal
-from sqlalchemy.dialects import postgresql
+from app.models.wallet import CurrencyEnum
 
 # revision identifiers, used by Alembic.
 revision = '8697d766eeb4'
@@ -23,11 +23,9 @@ def upgrade():
         sa.Column('id', sa.Integer, primary_key=True, nullable=False),
         sa.Column('user_id', sa.Integer, sa.ForeignKey('users.id', ondelete="cascade"), nullable=False, unique=True),
         sa.Column('balance', sa.Numeric(10, 2, decimal_return_scale=2, asdecimal=True), nullable=False, server_default='0'),
-        sa.Column('currency', postgresql.ENUM('USD', name='currency_enum'), server_default='USD', nullable=False),
+        sa.Column('currency', sa.String, server_default=CurrencyEnum.USD.value, nullable=False),
     )
 
 
 def downgrade():
     op.drop_table("wallets")
-    enum_type = postgresql.ENUM('USD', name='currency_enum')
-    enum_type.drop(op.get_bind(), checkfirst=False)
