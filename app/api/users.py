@@ -1,4 +1,5 @@
-from typing import Dict, Any
+from typing import Any, Dict
+
 import asyncpg
 from fastapi import APIRouter, HTTPException, status
 
@@ -21,9 +22,7 @@ async def create_user(params: CreateUser) -> Dict[str, Any]:
     try:
         data = await User.create(params.email)
         if not data:
-            raise HTTPException(
-                status_code=400, detail="User create error."
-            )
+            raise HTTPException(status_code=400, detail="User create error.")
         return UserResponse(**data).dict()
     except asyncpg.exceptions.UniqueViolationError as unique_exception:
         raise HTTPException(
@@ -50,15 +49,14 @@ async def enroll(user_id: int, params: WalletEnrollParams):
     if not row:
         raise HTTPException(status_code=404, detail="User does not exists")
 
-    if not row.get('wallet_id'):
-        raise HTTPException(status_code=404, detail="Wallet for user does not exists")
+    if not row.get("wallet_id"):
+        raise HTTPException(status_code=400, detail="Wallet for user does not exists")
 
     try:
-        wallet_id = int(row['wallet_id'])
+        wallet_id = int(row["wallet_id"])
     except ValueError as value_err:
         raise HTTPException(
-            status_code=400,
-            detail="Wallet id is not integer"
+            status_code=400, detail="Wallet id is not integer"
         ) from value_err
 
     try:
@@ -67,8 +65,7 @@ async def enroll(user_id: int, params: WalletEnrollParams):
             raise HTTPException(status_code=400, detail="Balance was not updated")
     except AssertionError as assert_err:
         raise HTTPException(
-            status_code=400,
-            detail="Balance was not updated"
+            status_code=400, detail="Balance was not updated"
         ) from assert_err
 
     user = dict(row)

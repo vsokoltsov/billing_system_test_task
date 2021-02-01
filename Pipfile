@@ -15,6 +15,7 @@ pydantic = "*"
 psycopg2-binary = "*"
 psycopg2 = "*"
 email-validator = "*"
+pre-commit = "*"
 
 [dev-packages]
 ipython = "*"
