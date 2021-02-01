@@ -4,6 +4,9 @@ import sqlalchemy
 from databases import Database
 from dotenv import load_dotenv
 
+REPEATABLE_READ = 'repeatable_read'
+SERIALIZABLE = 'serializable'
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 app_env = os.environ.get("APP_ENV")

@@ -5,7 +5,7 @@ from decimal import Decimal, InvalidOperation
 import sqlalchemy as sa
 from databases.backends.postgres import Record
 
-from app.db import db, metadata
+from app.db import db, metadata, SERIALIZABLE, REPEATABLE_READ
 from app.models.wallet_operations import WalletOperation
 
 wallets = sa.Table(
@@ -40,7 +40,7 @@ class Wallet:
         :params user_id: ID of user
         :returns: SQL row record
         """
-        async with db.transaction():
+        async with db.transaction(isolation=SERIALIZABLE):
             wallet_query = wallets.insert().values({"user_id": user_id})
             await WalletOperation.create(WalletOperation.CREATE)
             return await db.execute(wallet_query)
@@ -62,7 +62,7 @@ class Wallet:
 
         assert amount > 0, "amount should be positive"
 
-        async with db.transaction():
+        async with db.transaction(isolation=REPEATABLE_READ):
             query = (
                 wallets.update()
                 .where(wallets.c.id == wallet_id)
@@ -103,7 +103,7 @@ class Wallet:
         assert amount > 0, "amount must be positive"
         assert wallet_from != wallet_to, "wallet source and target must be different"
 
-        async with db.transaction():
+        async with db.transaction(isolation=SERIALIZABLE):
             # Get source wallet data
             get_source_query = wallets.select().where(wallets.c.id == wallet_from)
             source_wallet = await db.fetch_one(get_source_query)
