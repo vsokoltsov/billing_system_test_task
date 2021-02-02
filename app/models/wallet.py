@@ -6,7 +6,13 @@ from typing import Any, Mapping, Optional
 import sqlalchemy as sa
 from databases.backends.postgres import Record
 
-from app.db import REPEATABLE_READ, SERIALIZABLE, db, metadata
+from app.db import (
+    db,
+    metadata,
+    advisory_lock,
+    IsolationLevels,
+    LockID,
+)
 from app.models.wallet_operations import WalletOperation
 
 
@@ -51,7 +57,10 @@ class Wallet:
         :params user_id: ID of user
         :returns: SQL row record
         """
-        async with db.transaction(isolation=SERIALIZABLE):
+
+        async with advisory_lock(
+            db, IsolationLevels.SERIALIZABLE, LockID.CREATE_WALLET
+        ):
             wallet_query = wallets.insert().values({"user_id": user_id})
             await WalletOperation.create(WalletOperation.CREATE)
             return await db.execute(wallet_query)
@@ -73,7 +82,9 @@ class Wallet:
 
         assert amount > 0, "amount should be positive"
 
-        async with db.transaction(isolation=REPEATABLE_READ):
+        async with advisory_lock(
+            db, IsolationLevels.SERIALIZABLE, LockID.WALLET_ENROLL
+        ):
             query = (
                 wallets.update()
                 .where(wallets.c.id == wallet_id)
@@ -112,7 +123,10 @@ class Wallet:
         assert amount > 0, "amount must be positive"
         assert wallet_from != wallet_to, "wallet source and target must be different"
 
-        async with db.transaction(isolation=SERIALIZABLE):
+        # async with db.transaction(isolation=SERIALIZABLE):
+        async with advisory_lock(
+            db, IsolationLevels.SERIALIZABLE, LockID.WALLET_TRANSFER
+        ):
             # Get source wallet data
             get_source_query = wallets.select().where(wallets.c.id == wallet_from)
             source_wallet = await db.fetch_one(get_source_query)
