@@ -9,6 +9,8 @@ from alembic import op
 import sqlalchemy as sa
 from decimal import Decimal
 from app.models.wallet import CurrencyEnum
+from sqlalchemy.dialects.postgresql import NUMERIC
+from sqlalchemy import CheckConstraint
 
 # revision identifiers, used by Alembic.
 revision = '8697d766eeb4'
@@ -22,8 +24,9 @@ def upgrade():
         "wallets",
         sa.Column('id', sa.Integer, primary_key=True, nullable=False),
         sa.Column('user_id', sa.Integer, sa.ForeignKey('users.id', ondelete="cascade"), nullable=False, unique=True),
-        sa.Column('balance', sa.Numeric(10, 2, decimal_return_scale=2, asdecimal=True), nullable=False, server_default='0'),
+        sa.Column('balance', NUMERIC(10, 2), nullable=False, server_default='0'),
         sa.Column('currency', sa.String, server_default=CurrencyEnum.USD.value, nullable=False),
+        CheckConstraint('balance >= 0', name='wallet_positive_balance'),
     )
 
 

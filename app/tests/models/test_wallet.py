@@ -1,7 +1,9 @@
 from decimal import Decimal
 
 import pytest
+import asyncpg
 
+from app.db import db
 from app.models.user import User
 from app.models.wallet import InsufficientFundsException, Wallet
 from app.models.wallet_operations import WalletOperation
@@ -245,3 +247,13 @@ async def test_failed_transfer_amount_wallets_are_equal():
 
     assert new_user_data_1.get("balance") == 100
     assert new_user_data_2.get("balance") == 100
+
+
+@pytest.mark.asyncio
+async def test_failed_saving_of_negative_amount_value():
+    """ Test failed saving of wallets negative value. """
+
+    user_1 = await User.create("example_1@mail.com")
+    query = f'update wallets set balance = -100 where user_id={user_1.get("id")}'
+    with pytest.raises(asyncpg.exceptions.CheckViolationError):
+        await db.execute(query)
