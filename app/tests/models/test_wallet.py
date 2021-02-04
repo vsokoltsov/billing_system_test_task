@@ -136,7 +136,11 @@ async def test_success_transfer_amount_transactions_creation(test_db):
         user_data_1.get("wallet_id"), user_data_2.get("wallet_id"), 50
     )
 
-    query = "select wallet_from, wallet_to, operation, amount, created_at from wallet_operations"
+    query = (
+        "select wallet_from, wallet_to, "
+        "operation, amount, created_at "
+        "from wallet_operations"
+    )
     operations = await test_db.fetch_all(query)
 
     operations = [dict(op) for op in operations]
@@ -254,6 +258,6 @@ async def test_failed_saving_of_negative_amount_value():
     """ Test failed saving of wallets negative value. """
 
     user_1 = await User.create("example_1@mail.com")
-    query = f'update wallets set balance = -100 where user_id={user_1.get("id")}'
+    query = f"update wallets set balance = -100 " f'where user_id={user_1.get("id")}'
     with pytest.raises(asyncpg.exceptions.CheckViolationError):
         await db.execute(query)

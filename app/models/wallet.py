@@ -121,7 +121,7 @@ class Wallet:
         """
 
         assert amount > 0, "amount must be positive"
-        assert wallet_from != wallet_to, "wallet source and target must be different"
+        assert wallet_from != wallet_to, "wallet source and " "target must be different"
 
         # async with db.transaction(isolation=SERIALIZABLE):
         async with advisory_lock(

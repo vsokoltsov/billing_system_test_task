@@ -16,6 +16,8 @@ psycopg2-binary = "*"
 psycopg2 = "*"
 email-validator = "*"
 pre-commit = "*"
+pycodestyle = "*"
+flake8 = "*"
 
 [dev-packages]
 ipython = "*"
