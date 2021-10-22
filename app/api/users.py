@@ -11,7 +11,7 @@ from app.schemas.wallet import WalletEnrollParams
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(params: CreateUser) -> Dict[str, Any]:
     """
     Creates new user and its wallet.

@@ -4,18 +4,15 @@ services:
 
   postgres_test:
     container_name: db_test
-    image: postgres
+    image: postgres:12
     env_file: .env.test
     ports:
       - 5433:5432
-    volumes:
-      - test_volume:/var/lib/postgresql
-      - ./postgresql.conf:/var/lib/postgresql/data/postgresql.conf
+    # volumes:
+    #   - ./postgresql.conf:/var/lib/postgresql/data/postgresql.conf
     networks:
       - test
 
-volumes:
-  test_volume:
 networks:
   test:
     name: test

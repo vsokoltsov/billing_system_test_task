@@ -2,10 +2,12 @@ version: "3.9"
 
 services:
 
-  billing_app:
+  billing:
+    stdin_open: true
+    tty: true
     build: .
-    container_name: billing_app
-    command: uvicorn app:app --port 8000 --host 0.0.0.0 --reload
+    container_name: billing
+    command: run-dev
     volumes:
       - .:/app
     ports:
@@ -43,6 +45,9 @@ volumes:
   dev_volume:
 
 networks:
+  default:
+    name: billing_net
+    driver: bridge
   dev:
     name: dev
   test:

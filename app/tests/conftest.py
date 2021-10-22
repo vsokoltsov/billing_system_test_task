@@ -1,23 +1,32 @@
 import asyncio
-import os
-import warnings
 from typing import AsyncGenerator
 
 import pytest
 from databases import Database
 from httpx import AsyncClient
 
-import alembic
+from app.db import db
 
 # pylint: disable=no-name-in-module
-from alembic.config import Config
-from app import app
-from app.db import db
+from app.main import app
+from app.models.user import users
+from app.models.wallet import wallets
+from app.models.wallet_operations import wallet_operations
+
+
+@pytest.fixture(autouse=True)
+async def prepare_db():
+    """Delete previous records from database"""
+
+    await db.execute(query=users.delete())
+    await db.execute(query=wallets.delete())
+    await db.execute(query=wallet_operations.delete())
+    yield
 
 
 @pytest.fixture(scope="module")
 def event_loop():
-    """ Redefine event_loop for tests. """
+    """Redefine event_loop for tests."""
 
     loop = asyncio.get_event_loop()
     yield loop
@@ -26,78 +35,23 @@ def event_loop():
 
 @pytest.fixture(scope="module", autouse=True)
 async def connect_to_db():
-    """ Establish connection before tests and disconnect after test. """
+    """Establish connection before tests and disconnect after test."""
 
     await db.connect()
     yield
     await db.disconnect()
 
 
-@pytest.fixture(scope="module", autouse=True)
-def apply_migrations_module():
-    """ Apply migrations for separate modules """
-
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-    prev_app_env = os.environ["APP_ENV"]
-    os.environ["APP_ENV"] = "test"
-
-    path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    cfg = Config(os.path.join(path, "alembic/alembic.ini"))
-    # pylint: disable=no-member
-    alembic.command.upgrade(cfg, "head")
-    yield
-    # pylint: disable=no-member
-    alembic.command.downgrade(cfg, "base")
-    os.environ["APP_ENV"] = prev_app_env
-
-
-@pytest.fixture(scope="function", autouse=True)
-def apply_migrations_every_test():
-    """ Apply migrations for each test. """
-
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-    prev_app_env = os.environ["APP_ENV"]
-    os.environ["APP_ENV"] = "test"
-
-    path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    cfg = Config(os.path.join(path, "alembic/alembic.ini"))
-    # pylint: disable=no-member
-    alembic.command.upgrade(cfg, "head")
-    yield
-    # pylint: disable=no-member
-    alembic.command.downgrade(cfg, "base")
-    os.environ["APP_ENV"] = prev_app_env
-
-
-@pytest.fixture(scope="session")
-def apply_migrations():
-    """ Apply migrations for session scope. """
-
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-    prev_app_env = os.environ["APP_ENV"]
-    os.environ["APP_ENV"] = "test"
-
-    path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    cfg = Config(os.path.join(path, "alembic/alembic.ini"))
-    # pylint: disable=no-member
-    alembic.command.upgrade(cfg, "head")
-    yield
-    # pylint: disable=no-member
-    alembic.command.downgrade(cfg, "base")
-    os.environ["APP_ENV"] = prev_app_env
-
-
 @pytest.fixture
 def test_db() -> Database:
-    """ Retrieve instance of test database. """
+    """Retrieve instance of test database."""
 
     return db
 
 
 @pytest.fixture
 async def client() -> AsyncGenerator:
-    """ Cleint fixture for API tests. """
-
+    """Cleint fixture for API tests."""
     async with AsyncClient(
         app=app,
         base_url="http://testserver",

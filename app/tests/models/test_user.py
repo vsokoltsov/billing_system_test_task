@@ -8,7 +8,7 @@ from app.models.user import User
 
 @pytest.mark.asyncio
 async def test_success_user_creation(test_db):
-    """ Test success user creation with User model. """
+    """Test success user creation with User model."""
 
     users_count = await test_db.execute("select count(*) from users")
     await User.create("example@mail.com")
@@ -18,7 +18,7 @@ async def test_success_user_creation(test_db):
 
 @pytest.mark.asyncio
 async def test_success_wallet_creation(test_db):
-    """ Test success wallet instance creation. """
+    """Test success wallet instance creation."""
 
     wallets_count = await test_db.execute("select count(*) from wallets")
     await User.create("example@mail.com")
@@ -28,7 +28,7 @@ async def test_success_wallet_creation(test_db):
 
 @pytest.mark.asyncio
 async def test_failed_user_creation_user_exists(test_db):
-    """ Test failed user creation (user already exists). """
+    """Test failed user creation (user already exists)."""
 
     query = "insert into users(email) values (:email)"
     values = {"email": "example@mail.com"}
@@ -40,7 +40,7 @@ async def test_failed_user_creation_user_exists(test_db):
 
 @pytest.mark.asyncio
 async def test_failed_user_creation_email_empty():
-    """ Test failed user creation (email is empty). """
+    """Test failed user creation (email is empty)."""
 
     with pytest.raises(AssertionError):
         await User.create("")
@@ -48,17 +48,17 @@ async def test_failed_user_creation_email_empty():
 
 @pytest.mark.asyncio
 async def test_success_get_user_creation():
-    """ Test success user retrieving of user. """
+    """Test success user retrieving of user."""
 
-    await User.create("example@mail.com")
-    user = await User.get(1)
+    new_user = await User.create("example@mail.com")
+    user = await User.get(new_user.get("id"))
     assert user.get("email") == "example@mail.com"
     assert user.get("balance") == Decimal(0)
 
 
 @pytest.mark.asyncio
 async def test_failed_retiriving_of_user():
-    """ Test failed user retrieving (user does not exists). """
+    """Test failed user retrieving (user does not exists)."""
 
     user = await User.get(1)
     assert user is None

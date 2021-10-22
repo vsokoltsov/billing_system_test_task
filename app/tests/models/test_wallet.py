@@ -1,7 +1,7 @@
 from decimal import Decimal
 
-import pytest
 import asyncpg
+import pytest
 
 from app.db import db
 from app.models.user import User
@@ -11,7 +11,7 @@ from app.models.wallet_operations import WalletOperation
 
 @pytest.mark.asyncio
 async def test_success_wallet_enroll():
-    """ Test success wallet enroll. """
+    """Test success wallet enroll."""
 
     user = await User.create("example@mail.com")
     balance = await Wallet.enroll(user.get("wallet_id"), 10)
@@ -20,7 +20,7 @@ async def test_success_wallet_enroll():
 
 @pytest.mark.asyncio
 async def test_track_transaction_creation(test_db):
-    """ Test success transaction creation on success enroll. """
+    """Test success transaction creation on success enroll."""
 
     user = await User.create("example@mail.com")
     await Wallet.enroll(user.get("wallet_id"), 10)
@@ -34,7 +34,7 @@ async def test_track_transaction_creation(test_db):
 
 @pytest.mark.asyncio
 async def test_failed_wallet_enroll_with_negative_value():
-    """ Test failed wallet enroll with negative value. """
+    """Test failed wallet enroll with negative value."""
 
     user = await User.create("example@mail.com")
     with pytest.raises(AssertionError):
@@ -43,7 +43,7 @@ async def test_failed_wallet_enroll_with_negative_value():
 
 @pytest.mark.asyncio
 async def test_failed_wallet_enroll():
-    """ Test failed wallet enroll (wallet does not exists). """
+    """Test failed wallet enroll (wallet does not exists)."""
 
     balance = await Wallet.enroll(1, 10)
     assert balance is None
@@ -51,7 +51,7 @@ async def test_failed_wallet_enroll():
 
 @pytest.mark.asyncio
 async def test_failed_wallet_enroll_with_zero_value():
-    """ Test failed wallet enroll (amount is 0). """
+    """Test failed wallet enroll (amount is 0)."""
 
     user = await User.create("example@mail.com")
     with pytest.raises(AssertionError):
@@ -60,7 +60,7 @@ async def test_failed_wallet_enroll_with_zero_value():
 
 @pytest.mark.asyncio
 async def test_failed_wallet_enroll_with_wrong_type():
-    """ Test failed wallet enroll (amount has wrong type). """
+    """Test failed wallet enroll (amount has wrong type)."""
 
     user = await User.create("example@mail.com")
     with pytest.raises(ValueError):
@@ -90,7 +90,7 @@ async def test_failed_get_by_user_id():
 
 @pytest.mark.asyncio
 async def test_success_transfer_amount():
-    """ Test success transfer among users' wallets. """
+    """Test success transfer among users' wallets."""
 
     user_1 = await User.create("example_1@mail.com")
     user_2 = await User.create("example_2@mail.com")
@@ -118,7 +118,7 @@ async def test_success_transfer_amount():
 
 @pytest.mark.asyncio
 async def test_success_transfer_amount_transactions_creation(test_db):
-    """ Test success transactions creations after transfer. """
+    """Test success transactions creations after transfer."""
 
     user_1 = await User.create("example_1@mail.com")
     user_2 = await User.create("example_2@mail.com")
@@ -255,7 +255,7 @@ async def test_failed_transfer_amount_wallets_are_equal():
 
 @pytest.mark.asyncio
 async def test_failed_saving_of_negative_amount_value():
-    """ Test failed saving of wallets negative value. """
+    """Test failed saving of wallets negative value."""
 
     user_1 = await User.create("example_1@mail.com")
     query = f"update wallets set balance = -100 " f'where user_id={user_1.get("id")}'

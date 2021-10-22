@@ -1,7 +1,6 @@
 import os
-from enum import Enum
-
 from contextlib import asynccontextmanager
+from enum import Enum
 
 import sqlalchemy
 from databases import Database
@@ -27,14 +26,14 @@ metadata = sqlalchemy.MetaData()
 
 
 class IsolationLevels(Enum):
-    """ Represents isolation levels for the database transaction. """
+    """Represents isolation levels for the database transaction."""
 
     REPEATABLE_READ = "repeatable_read"
     SERIALIZABLE = "serializable"
 
 
 class LockID(Enum):
-    """ Enumeration of possible locks ids. """
+    """Enumeration of possible locks ids."""
 
     CREATE_USER = 1
     GET_BY_WALLET_ID = 2
@@ -47,8 +46,8 @@ class LockID(Enum):
 async def advisory_lock(
     database: Database,
     isolation_level: IsolationLevels,
-    lock_id: LockID,
-    record_id: int = None,
+    # lock_id: LockID,
+    # record_id: int = None,
 ):
     """
     Perform postgres advisory locking by some ID.
@@ -59,18 +58,18 @@ async def advisory_lock(
     :param record_id: ID of record
     """
 
-    if record_id:
-        lock_query = "select pg_advisory_lock(:lock_id,:record_id)"
-        unlock_query = "select pg_advisory_unlock(:lock_id, :record_id)"
-        values = {"lock_id": lock_id.value, "record_id": record_id}
-    else:
-        lock_query = "select pg_advisory_lock(:lock_id)"
-        unlock_query = "select pg_advisory_unlock(:lock_id)"
-        values = {"lock_id": lock_id.value}
+    # if record_id:
+    #     lock_query = "select pg_advisory_lock(:lock_id,:record_id)"
+    #     unlock_query = "select pg_advisory_unlock(:lock_id, :record_id)"
+    #     values = {"lock_id": lock_id.value, "record_id": record_id}
+    # else:
+    #     lock_query = "select pg_advisory_lock(:lock_id)"
+    #     unlock_query = "select pg_advisory_unlock(:lock_id)"
+    #     values = {"lock_id": lock_id.value}
 
-    try:
-        await database.execute(query=lock_query, values=values)
-        async with database.transaction(isolation=isolation_level.value) as transaction:
-            yield transaction
-    finally:
-        await database.execute(query=unlock_query, values=values)
+    # try:
+    # await database.execute(query=lock_query, values=values)
+    async with database.transaction(isolation=isolation_level.value) as transaction:
+        yield transaction
+    # finally:
+    # await database.execute(query=unlock_query, values=values)

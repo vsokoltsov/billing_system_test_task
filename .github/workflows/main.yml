@@ -9,37 +9,48 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    container: python:3.9
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres:12
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_USER: user
+          POSTGRES_DB: billing_test
+
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v2
-
-      - name: Populate .env file
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.1.10
+          virtualenvs-create: true
+          virtualenvs-in-project: false
+      
+      - name: Move poetry dependencies to standart requirements.txt
         run: |
-          echo """
-            POSTGRES_DB=billing
-            PGDATA=/var/lib/postgresql/data/billing_app
-            POSTGRES_USER=user
-            POSTGRES_PASSWORD=password
-            DB_HOST=postgres
-            DB_PORT=5432
-            PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
-            PGADMIN_DEFAULT_PASSWORD=admin
-            APP_ENV=development
-          """ > .env
-
-      - name: Populate .env.test file
-        run: |
-          echo """
-            APP_ENV=test
-            POSTGRES_DB=billing_test
-            PGDATA=/var/lib/postgresql/data/billing_app_test
-            DB_HOST=postgres_test
-            DB_PORT=5432
-            POSTGRES_USER=user
-            POSTGRES_PASSWORD=password
-          """ > .env.test
+          poetry export --dev -f requirements.txt --output requirements.txt
+          pip install --no-cache-dir -r requirements.txt
 
       - name: Run tests
+        env:
+          DB_HOST: postgres
+          DB_PORT: 5432
+          POSTGRES_PASSWORD: password
+          POSTGRES_USER: user
+          POSTGRES_DB: billing_test
+
         run: |
-          docker-compose -f docker-compose.test.yml up -d --force-recreate
-          docker ps -a
-          docker-compose run billing_app bash -c "pytest"
+          touch .env.test
+          make alembic-upgrade
+          make test

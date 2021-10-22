@@ -5,12 +5,14 @@ Revises: 7b1f4f065670
 Create Date: 2021-01-31 00:27:48.971118
 
 """
-from alembic import op
-import sqlalchemy as sa
 from decimal import Decimal
-from app.models.wallet import CurrencyEnum
-from sqlalchemy.dialects.postgresql import NUMERIC
+
+import sqlalchemy as sa
 from sqlalchemy import CheckConstraint
+from sqlalchemy.dialects.postgresql import NUMERIC
+
+from alembic import op
+from app.models.wallet import CurrencyEnum
 
 # revision identifiers, used by Alembic.
 revision = '8697d766eeb4'

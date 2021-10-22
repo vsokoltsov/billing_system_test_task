@@ -21,7 +21,7 @@ wallet_operations = sa.Table(
 
 
 class WalletOperation:
-    """ Represents logging information about wallet operations. """
+    """Represents logging information about wallet operations."""
 
     RETRIEVE = "retrieve"
     CREATE = "create"

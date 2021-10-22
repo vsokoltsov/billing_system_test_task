@@ -1,11 +1,11 @@
 repos:
   - repo: https://github.com/ambv/black
-    rev: 19.10b0
+    rev: 21.9b0
     hooks:
       - id: black
         files: app/
   - repo: https://github.com/pycqa/pylint
-    rev: pylint-2.6.0
+    rev: v2.11.1
     hooks:
       - id: pylint
         files: app/
