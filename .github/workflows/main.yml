@@ -56,6 +56,12 @@ jobs:
       #       POSTGRES_USER=user
       #       POSTGRES_PASSWORD=password
       #     """ > .env.test
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.1.10
+          virtualenvs-create: true
+          virtualenvs-in-project: false
 
       - name: Run tests
         env:
@@ -67,7 +73,5 @@ jobs:
 
         run: |
           touch .env.test
-          pip install poetry
-          poetry install --no-interaction --no-ansi
           make alembic-upgrade
           make test
