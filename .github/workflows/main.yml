@@ -66,6 +66,7 @@ jobs:
           POSTGRES_DB: billing_test
 
         run: |
-          docker-compose -f docker-compose.test.yml up -d --force-recreate
-          docker ps -a
-          docker-compose run billing test
+          touch .env.test
+          poetry install --no-interaction --no-ansi
+          make alembic-upgrade
+          make test
