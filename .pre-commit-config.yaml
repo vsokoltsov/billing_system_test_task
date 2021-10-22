@@ -12,6 +12,7 @@ repos:
         exclude: ^migrations/
         args:
           - --rcfile=./.pylintrc
+          - --ignore=migrations
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: ''
     hooks:
