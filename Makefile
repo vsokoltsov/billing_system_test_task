@@ -30,11 +30,9 @@ lint:
 	@echo "* Run isort"
 	@exec isort .
 	@echo "* Run black"
-	@exec black app
+	@exec black app tests
 	@echo "* Run pylint"
-	@exec pylint app
-	# @echo "* Run bandit"
-	# @exec bandit -r app/*
+	@exec pylint app tests
 	@echo "* Run mypy"
 	@exec mypy app
 	@exec rm -rf .mypy_cache
