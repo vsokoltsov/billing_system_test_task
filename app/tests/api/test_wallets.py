@@ -6,7 +6,7 @@ from app.models.wallet import Wallet
 
 @pytest.mark.asyncio
 async def test_success_wallet_transfer(client):
-    """ Test success wallet transfer. """
+    """Test success wallet transfer."""
 
     user_1 = await User.create("example_1@mail.com")
     user_2 = await User.create("example_2@mail.com")
@@ -37,7 +37,7 @@ async def test_success_wallet_transfer(client):
 
 @pytest.mark.asyncio
 async def test_failed_wallet_transfer_amount_is_negative(client):
-    """ Test failed wallet transfer (amount field is negative). """
+    """Test failed wallet transfer (amount field is negative)."""
 
     user_1 = await User.create("example_1@mail.com")
     user_2 = await User.create("example_2@mail.com")
@@ -68,7 +68,7 @@ async def test_failed_wallet_transfer_amount_is_negative(client):
 
 @pytest.mark.asyncio
 async def test_failed_wallet_transfer_params_are_empty(client):
-    """ Test failed wallet transfer (amount field is negative). """
+    """Test failed wallet transfer (amount field is negative)."""
 
     user_1 = await User.create("example_1@mail.com")
     user_2 = await User.create("example_2@mail.com")
@@ -95,7 +95,7 @@ async def test_failed_wallet_transfer_params_are_empty(client):
 
 @pytest.mark.asyncio
 async def test_failed_wallet_transfer_wallets_are_equal(client):
-    """ Test failed wallet transfer (Wallets are equal). """
+    """Test failed wallet transfer (Wallets are equal)."""
 
     user_1 = await User.create("example_1@mail.com")
     user_2 = await User.create("example_2@mail.com")
@@ -126,7 +126,7 @@ async def test_failed_wallet_transfer_wallets_are_equal(client):
 
 @pytest.mark.asyncio
 async def test_failed_wallet_transfer_wallets_not_enough_resources(client):
-    """ Test failed wallet transfer (Wallets are equal). """
+    """Test failed wallet transfer (Wallets are equal)."""
 
     user_1 = await User.create("example_1@mail.com")
     user_2 = await User.create("example_2@mail.com")

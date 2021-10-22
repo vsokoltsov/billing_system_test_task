@@ -1,23 +1,16 @@
 import enum
-
 from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping, Optional
 
 import sqlalchemy as sa
 from databases.backends.postgres import Record
 
-from app.db import (
-    db,
-    metadata,
-    advisory_lock,
-    IsolationLevels,
-    LockID,
-)
+from app.db import advisory_lock, db, metadata
 from app.models.wallet_operations import WalletOperation
 
 
 class CurrencyEnum(enum.Enum):
-    """ Enum for currencies. """
+    """Enum for currencies."""
 
     USD = "USD"
 
@@ -43,11 +36,11 @@ wallets = sa.Table(
 
 
 class InsufficientFundsException(Exception):
-    """ Insufficient funds exception. """
+    """Insufficient funds exception."""
 
 
 class Wallet:
-    """ Represents operations with wallet. """
+    """Represents operations with wallet."""
 
     @classmethod
     async def create(cls, user_id: int) -> Record:
@@ -59,7 +52,8 @@ class Wallet:
         """
 
         async with advisory_lock(
-            db, IsolationLevels.SERIALIZABLE, LockID.CREATE_WALLET
+            db,
+            # IsolationLevels.SERIALIZABLE, LockID.CREATE_WALLET
         ):
             wallet_query = wallets.insert().values({"user_id": user_id})
             await WalletOperation.create(WalletOperation.CREATE)
@@ -83,7 +77,8 @@ class Wallet:
         assert amount > 0, "amount should be positive"
 
         async with advisory_lock(
-            db, IsolationLevels.SERIALIZABLE, LockID.WALLET_ENROLL
+            db,
+            # IsolationLevels.SERIALIZABLE, LockID.WALLET_ENROLL
         ):
             query = (
                 wallets.update()
@@ -93,7 +88,9 @@ class Wallet:
             )
             balance = await db.execute(query)
             await WalletOperation.create(
-                WalletOperation.RECEIPT, amount, wallet_to=wallet_id,
+                WalletOperation.RECEIPT,
+                amount,
+                wallet_to=wallet_id,
             )
             return balance
 
@@ -125,7 +122,8 @@ class Wallet:
 
         # async with db.transaction(isolation=SERIALIZABLE):
         async with advisory_lock(
-            db, IsolationLevels.SERIALIZABLE, LockID.WALLET_TRANSFER
+            db,
+            # IsolationLevels.SERIALIZABLE, LockID.WALLET_TRANSFER
         ):
             # Get source wallet data
             get_source_query = wallets.select().where(wallets.c.id == wallet_from)

@@ -10,7 +10,7 @@ router = APIRouter(prefix="/wallets", tags=["wallets"])
 
 @router.post("/transfer", response_model=UserResponse, status_code=status.HTTP_200_OK)
 async def transfer(params: WalletTransferParams):
-    """ Handler for routing of funds from one wallet to another. """
+    """Handler for routing of funds from one wallet to another."""
 
     wallet_id = await Wallet.transfer(
         params.wallet_from, params.wallet_to, params.amount

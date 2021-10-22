@@ -5,13 +5,11 @@ Revises: 8697d766eeb4
 Create Date: 2021-01-31 20:29:13.453079
 
 """
-from alembic import op
 import sqlalchemy as sa
-
 from sqlalchemy import CheckConstraint
-
 from sqlalchemy.dialects.postgresql import NUMERIC
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = '1af7d2c06855'

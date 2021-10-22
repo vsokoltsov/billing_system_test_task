@@ -2,7 +2,7 @@
 # A comma-separated list of package or module names from where C extensions may
 # be loaded. Extensions are loading into the active Python interpreter and may
 # run arbitrary code.
-extension-pkg-whitelist=
+extension-pkg-whitelist=pydantic
 
 # Specify a score threshold to be exceeded before program exits with error.
 fail-under=10
@@ -145,6 +145,7 @@ disable=print-statement,
         bad-continuation,
         no-value-for-parameter,
         unsubscriptable-object
+        duplicate-code
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -366,7 +367,7 @@ ignore-docstrings=yes
 ignore-imports=no
 
 # Minimum lines number of a similarity.
-min-similarity-lines=4
+min-similarity-lines=50
 
 
 [BASIC]

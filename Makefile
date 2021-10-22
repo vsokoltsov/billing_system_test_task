@@ -24,3 +24,17 @@ test:
 		&& source .env.test \
 		&& make alembic-upgrade \
 		&& py.test -svvv -rs --cov app --cov-report term-missing
+
+.PHONY: lint
+lint:
+	@echo "* Run isort"
+	@exec isort .
+	@echo "* Run black"
+	@exec black app
+	@echo "* Run pylint"
+	@exec pylint app
+	# @echo "* Run bandit"
+	# @exec bandit -r app/*
+	@echo "* Run mypy"
+	@exec mypy app
+	@exec rm -rf .mypy_cache

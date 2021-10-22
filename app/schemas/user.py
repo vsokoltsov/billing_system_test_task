@@ -4,13 +4,13 @@ from pydantic import BaseModel, EmailStr
 
 
 class CreateUser(BaseModel):
-    """ Parameters description for user creation. """
+    """Parameters description for user creation."""
 
     email: EmailStr
 
 
 class UserResponse(BaseModel):
-    """ Fields for user responses. """
+    """Fields for user responses."""
 
     id: int
     email: EmailStr
