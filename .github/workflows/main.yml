@@ -65,7 +65,7 @@ jobs:
       
       - name: Move poetry dependencies to standart requirements.txt
         run: |
-          poetry export -f requirements.txt --output requirements.txt
+          poetry export --dev -f requirements.txt --output requirements.txt
           pip install --no-cache-dir -r requirements.txt
           
           
