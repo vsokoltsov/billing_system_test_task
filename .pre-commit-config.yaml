@@ -9,6 +9,7 @@ repos:
     hooks:
       - id: pylint
         files: app/
+        exclude: ^migrations/
         args:
           - --rcfile=./.pylintrc
   - repo: https://github.com/pre-commit/mirrors-mypy
