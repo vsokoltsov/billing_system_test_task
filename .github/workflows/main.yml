@@ -67,6 +67,7 @@ jobs:
 
         run: |
           touch .env.test
+          pip install poetry
           poetry install --no-interaction --no-ansi
           make alembic-upgrade
           make test
