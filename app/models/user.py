@@ -3,7 +3,7 @@ from typing import Any, Mapping, Optional
 import sqlalchemy as sa
 from sqlalchemy.sql import select
 
-from app.db import advisory_lock, db, metadata
+from app.db import IsolationLevels, advisory_lock, db, metadata
 from app.models.wallet import Wallet, wallets
 
 users = sa.Table(
@@ -59,7 +59,8 @@ class User:
 
         async with advisory_lock(
             db,
-            # IsolationLevels.REPEATABLE_READ, LockID.GET_BY_WALLET_ID
+            IsolationLevels.REPEATABLE_READ,
+            #  LockID.GET_BY_WALLET_ID
         ):
             j = users.join(wallets, users.c.id == wallets.c.user_id, isouter=True)
             query = (
@@ -92,7 +93,8 @@ class User:
 
         async with advisory_lock(
             db,
-            # IsolationLevels.SERIALIZABLE, LockID.CREATE_USER
+            IsolationLevels.SERIALIZABLE,
+            # LockID.CREATE_USER
         ) as transaction:
             user_query = users.insert().values({"email": email})
             user_id = await db.execute(user_query)
