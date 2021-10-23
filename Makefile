@@ -25,6 +25,19 @@ test:
 		&& make alembic-upgrade \
 		&& py.test -svvv -rs --cov app --cov-report term-missing
 
+.PHONY: check
+check:
+	@echo "Run isort"
+	@exec isort --check-only .
+	@echo "Run black"
+	@exec black --check --diff app tests
+	@echo "Run flake"
+	@exec pylint app tests
+	@exec vulture app
+	@echo "Run mypy"
+	@exec mypy app
+	@exec rm -rf .mypy_cache
+
 .PHONY: lint
 lint:
 	@echo "* Run isort"
