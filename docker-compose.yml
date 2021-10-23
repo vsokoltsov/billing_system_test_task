@@ -17,6 +17,8 @@ services:
     networks:
       - dev
       - test
+    env_file:
+      - .env
 
   postgres:
     image: postgres

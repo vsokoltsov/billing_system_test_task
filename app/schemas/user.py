@@ -16,3 +16,4 @@ class UserResponse(BaseModel):
     email: EmailStr
     wallet_id: int
     balance: Decimal
+    currency: str
