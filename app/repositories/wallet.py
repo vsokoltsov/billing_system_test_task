@@ -2,9 +2,9 @@ from abc import ABC, abstractmethod
 from decimal import Decimal
 from typing import Optional
 from databases import Database
-import databases
 from app.adapters.sql.models import wallets
 from app.entities.wallet import WalletEntity
+from .base import BaseRepository
 
 class AbstractWalletRepository(ABC):
     """Represents interface for wallet repository"""
@@ -63,11 +63,8 @@ class AbstractWalletRepository(ABC):
         ...
 
 
-class WalletRepository(AbstractWalletRepository):
+class WalletRepository(BaseRepository, AbstractWalletRepository):
     """Implementation of wallet repository."""
-
-    def __init__(self, db: Database):
-        self._db = db
 
     async def get_by_id(self, wallet_id: int) -> WalletEntity:
         """

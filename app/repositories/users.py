@@ -6,6 +6,7 @@ from sqlalchemy.sql import select
 
 from app.adapters.sql.models import users, wallets
 from app.entities.user import User
+from .base import BaseRepository
 
 
 class AbstractUserRepository(ABC):
@@ -41,11 +42,8 @@ class AbstractUserRepository(ABC):
         ...
 
 
-class UserRepository(AbstractUserRepository):
+class UserRepository(BaseRepository, AbstractUserRepository):
     """Implementation of user repository"""
-
-    def __init__(self, db: Database):
-        self._db = db
 
     async def get_by_id(self, user_id: int) -> Optional[User]:
         """
