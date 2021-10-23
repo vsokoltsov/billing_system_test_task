@@ -42,6 +42,9 @@ jobs:
           poetry export --dev -f requirements.txt --output requirements.txt
           pip install --no-cache-dir -r requirements.txt
 
+      - name: Run linter
+        run: make lint
+
       - name: Run tests
         env:
           DB_HOST: postgres
