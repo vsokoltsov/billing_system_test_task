@@ -1,5 +1,6 @@
-import pytest
 from decimal import Decimal
+
+import pytest
 from asyncpg.exceptions import UniqueViolationError
 
 from app.entities.currency import CurrencyEnum
@@ -20,7 +21,7 @@ async def test_success_user_creation(test_db):
 @pytest.mark.asyncio
 async def test_failed_user_creation_user_exists(test_db, user_factory):
     """Test failed user creation (user already exists)"""
-    
+
     repository = UserRepository(db=test_db)
     await user_factory.create(email="example@mail.com")
 
@@ -45,11 +46,9 @@ async def test_success_user_by_id_receiving(test_db, user_factory, wallet_factor
     repository = UserRepository(db=test_db)
     # user_id = await user_factory.create(email="example@mail.com")
     factory_user = await user_factory.create(email="example@mail.com")
-    wallet = await wallet_factory.create(user_id=factory_user.id, balance=Decimal('100'))
-    # user_id = await repository.create("example@mail.com")
-    # query = "insert into wallets(user_id) values (:user_id) returning id"
-    # values = {"user_id": user_id}
-    # wallet_id = await test_db.execute(query=query, values=values)
+    wallet = await wallet_factory.create(
+        user_id=factory_user.id, balance=Decimal("100")
+    )
 
     user = await repository.get_by_id(factory_user.id)
     assert user is not None

@@ -1,153 +1,137 @@
 import pytest
 
-from app.models.user import User
-from app.models.wallet import Wallet
+from app.repositories.users import UserRepository
 
 
 @pytest.mark.asyncio
-async def test_success_wallet_transfer(client):
+async def test_success_wallet_transfer(client, test_db, user_factory, wallet_factory):
     """Test success wallet transfer."""
 
-    user_1 = await User.create("example_1@mail.com")
-    user_2 = await User.create("example_2@mail.com")
+    user_repo = UserRepository(db=test_db)
+    base_user_1 = await user_factory.create()
+    wallet_1 = await wallet_factory.create(user_id=base_user_1.id)
 
-    balance_1 = await Wallet.enroll(user_1.get("wallet_id"), 100)
-    balance_2 = await Wallet.enroll(user_2.get("wallet_id"), 100)
-
-    user_data_1 = dict(user_1)
-    user_data_2 = dict(user_2)
-
-    user_data_1["balance"] = balance_1
-    user_data_2["balance"] = balance_2
+    base_user_2 = await user_factory.create()
+    wallet_2 = await wallet_factory.create(user_id=base_user_2.id)
 
     params = {
-        "wallet_from": user_data_1.get("wallet_id"),
-        "wallet_to": user_data_2.get("wallet_id"),
+        "wallet_from": wallet_1.id,
+        "wallet_to": wallet_2.id,
         "amount": 50,
     }
     response = await client.post("/api/wallets/transfer", json=params)
 
     assert response.status_code == 200
-    new_user_data_1 = await User.get(user_data_1.get("id"))
-    new_user_data_2 = await User.get(user_data_2.get("id"))
+    new_user_data_1 = await user_repo.get_by_id(user_id=base_user_1.id)
+    new_user_data_2 = await user_repo.get_by_id(user_id=base_user_2.id)
 
-    assert new_user_data_1.get("balance") == 50
-    assert new_user_data_2.get("balance") == 150
+    assert new_user_data_1.balance == 50
+    assert new_user_data_2.balance == 150
 
 
 @pytest.mark.asyncio
-async def test_failed_wallet_transfer_amount_is_negative(client):
+async def test_failed_wallet_transfer_amount_is_negative(
+    client, test_db, user_factory, wallet_factory
+):
     """Test failed wallet transfer (amount field is negative)."""
 
-    user_1 = await User.create("example_1@mail.com")
-    user_2 = await User.create("example_2@mail.com")
+    user_repo = UserRepository(db=test_db)
+    base_user_1 = await user_factory.create()
+    wallet_1 = await wallet_factory.create(user_id=base_user_1.id)
 
-    balance_1 = await Wallet.enroll(user_1.get("wallet_id"), 100)
-    balance_2 = await Wallet.enroll(user_2.get("wallet_id"), 100)
-
-    user_data_1 = dict(user_1)
-    user_data_2 = dict(user_2)
-
-    user_data_1["balance"] = balance_1
-    user_data_2["balance"] = balance_2
+    base_user_2 = await user_factory.create()
+    wallet_2 = await wallet_factory.create(user_id=base_user_2.id)
 
     params = {
-        "wallet_from": user_data_1.get("wallet_id"),
-        "wallet_to": user_data_2.get("wallet_id"),
+        "wallet_from": wallet_1.id,
+        "wallet_to": wallet_2.id,
         "amount": -50,
     }
     response = await client.post("/api/wallets/transfer", json=params)
 
     assert response.status_code == 422
-    new_user_data_1 = await User.get(user_data_1.get("id"))
-    new_user_data_2 = await User.get(user_data_2.get("id"))
+    new_user_data_1 = await user_repo.get_by_id(user_id=base_user_1.id)
+    new_user_data_2 = await user_repo.get_by_id(user_id=base_user_2.id)
 
-    assert new_user_data_1.get("balance") == 100
-    assert new_user_data_2.get("balance") == 100
+    assert new_user_data_1.balance == 100
+    assert new_user_data_2.balance == 100
 
 
 @pytest.mark.asyncio
-async def test_failed_wallet_transfer_params_are_empty(client):
+async def test_failed_wallet_transfer_params_are_empty(
+    client, test_db, user_factory, wallet_factory
+):
     """Test failed wallet transfer (amount field is negative)."""
 
-    user_1 = await User.create("example_1@mail.com")
-    user_2 = await User.create("example_2@mail.com")
+    user_repo = UserRepository(db=test_db)
+    base_user_1 = await user_factory.create()
+    await wallet_factory.create(user_id=base_user_1.id)
 
-    balance_1 = await Wallet.enroll(user_1.get("wallet_id"), 100)
-    balance_2 = await Wallet.enroll(user_2.get("wallet_id"), 100)
-
-    user_data_1 = dict(user_1)
-    user_data_2 = dict(user_2)
-
-    user_data_1["balance"] = balance_1
-    user_data_2["balance"] = balance_2
+    base_user_2 = await user_factory.create()
+    await wallet_factory.create(user_id=base_user_2.id)
 
     params = {}
     response = await client.post("/api/wallets/transfer", json=params)
 
     assert response.status_code == 422
-    new_user_data_1 = await User.get(user_data_1.get("id"))
-    new_user_data_2 = await User.get(user_data_2.get("id"))
+    new_user_data_1 = await user_repo.get_by_id(user_id=base_user_1.id)
+    new_user_data_2 = await user_repo.get_by_id(user_id=base_user_2.id)
 
-    assert new_user_data_1.get("balance") == 100
-    assert new_user_data_2.get("balance") == 100
+    assert new_user_data_1.balance == 100
+    assert new_user_data_2.balance == 100
 
 
 @pytest.mark.asyncio
-async def test_failed_wallet_transfer_wallets_are_equal(client):
+async def test_failed_wallet_transfer_wallets_are_equal(
+    client, test_db, user_factory, wallet_factory
+):
     """Test failed wallet transfer (Wallets are equal)."""
 
-    user_1 = await User.create("example_1@mail.com")
-    user_2 = await User.create("example_2@mail.com")
+    user_repo = UserRepository(db=test_db)
+    base_user_1 = await user_factory.create()
+    wallet_1 = await wallet_factory.create(user_id=base_user_1.id)
 
-    balance_1 = await Wallet.enroll(user_1.get("wallet_id"), 100)
-    balance_2 = await Wallet.enroll(user_2.get("wallet_id"), 100)
-
-    user_data_1 = dict(user_1)
-    user_data_2 = dict(user_2)
-
-    user_data_1["balance"] = balance_1
-    user_data_2["balance"] = balance_2
+    base_user_2 = await user_factory.create()
+    await wallet_factory.create(user_id=base_user_2.id)
 
     params = {
-        "wallet_from": user_data_1.get("wallet_id"),
-        "wallet_to": user_data_1.get("wallet_id"),
+        "wallet_from": wallet_1.id,
+        "wallet_to": wallet_1.id,
         "amount": 50,
     }
     response = await client.post("/api/wallets/transfer", json=params)
 
     assert response.status_code == 422
-    new_user_data_1 = await User.get(user_data_1.get("id"))
-    new_user_data_2 = await User.get(user_data_2.get("id"))
+    new_user_data_1 = await user_repo.get_by_id(user_id=base_user_1.id)
+    new_user_data_2 = await user_repo.get_by_id(user_id=base_user_2.id)
 
-    assert new_user_data_1.get("balance") == 100
-    assert new_user_data_2.get("balance") == 100
+    assert new_user_data_1.balance == 100
+    assert new_user_data_2.balance == 100
 
 
 @pytest.mark.asyncio
-async def test_failed_wallet_transfer_wallets_not_enough_resources(client):
+async def test_failed_wallet_transfer_wallets_not_enough_resources(
+    client, test_db, user_factory, wallet_factory
+):
     """Test failed wallet transfer (Wallets are equal)."""
 
-    user_1 = await User.create("example_1@mail.com")
-    user_2 = await User.create("example_2@mail.com")
+    user_repo = UserRepository(db=test_db)
+    base_user_1 = await user_factory.create()
+    wallet_1 = await wallet_factory.create(user_id=base_user_1.id)
 
-    balance_2 = await Wallet.enroll(user_2.get("wallet_id"), 100)
-
-    user_data_1 = dict(user_1)
-    user_data_2 = dict(user_2)
-
-    user_data_2["balance"] = balance_2
+    base_user_2 = await user_factory.create()
+    wallet_2 = await wallet_factory.create(user_id=base_user_2.id)
 
     params = {
-        "wallet_from": user_data_1.get("wallet_id"),
-        "wallet_to": user_data_1.get("wallet_id"),
-        "amount": 50,
+        "wallet_from": wallet_1.id,
+        "wallet_to": wallet_2.id,
+        "amount": 110,
     }
     response = await client.post("/api/wallets/transfer", json=params)
 
-    assert response.status_code == 422
-    new_user_data_1 = await User.get(user_data_1.get("id"))
-    new_user_data_2 = await User.get(user_data_2.get("id"))
+    assert response.status_code == 400
+    new_user_data_1 = await user_repo.get_by_id(user_id=base_user_1.id)
+    new_user_data_2 = await user_repo.get_by_id(user_id=base_user_2.id)
 
-    assert new_user_data_1.get("balance") == 0
-    assert new_user_data_2.get("balance") == 100
+    assert new_user_data_1.balance == 100
+    assert new_user_data_2.balance == 100

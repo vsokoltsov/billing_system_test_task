@@ -14,7 +14,7 @@ class AbstractWalletOperationRepository(ABC):
     async def create(
         self,
         *,
-        operation: str,
+        operation: Operations,
         amount: Decimal,
         wallet_from: int = None,
         wallet_to: int = None,

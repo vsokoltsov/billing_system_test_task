@@ -1,31 +1,62 @@
+from typing import Callable, List
+
 import uvicorn
-from fastapi import FastAPI, APIRouter
-from typing import List
+from fastapi import APIRouter, FastAPI
 
 from app import settings
+from app.adapters.sql.db import connect_db, disconnect_db, get_db
 from app.api import users_routes, wallets_routes
-from app.db import db
-from databases import Database
+from app.repositories.users import UserRepository
+from app.repositories.wallet import WalletRepository
+from app.repositories.wallet_operations import WalletOperationRepository
+from app.usecases.user import AbstractUserUsecase, UserUsecase
+from app.usecases.wallet import AbstractWalletUsecase, WalletUsecase
 
 
-def init_app(db: Database, routes: List[APIRouter]) -> FastAPI:
+def init_app(
+    connect_db: Callable,
+    disconnect_db: Callable,
+    routes: List[APIRouter],
+    user_usecase: AbstractUserUsecase,
+    wallet_usecase: AbstractWalletUsecase,
+) -> FastAPI:
     """Initialize application parameters."""
 
     app = FastAPI(title="Billing system sample")
-    app.add_event_handler("startup", db.connect)
-    app.add_event_handler("shutdown", db.disconnect)
+    app.add_event_handler("startup", connect_db)
+    app.add_event_handler("shutdown", disconnect_db)
     for route in routes:
         app.include_router(route, prefix="/api")
+    app.state.user_usecase = user_usecase
+    app.state.wallet_usecase = wallet_usecase
     return app
 
 
 def run_app():
+    """Run application instance"""
+
+    _db = get_db()
+    user_repo = UserRepository(db=_db)
+    wallet_repo = WalletRepository(db=_db)
+    wallet_operation_repo = WalletOperationRepository(db=_db)
+    user_usecase = UserUsecase(
+        app_db=_db,
+        user_repo=user_repo,
+        wallet_repo=wallet_repo,
+        wallet_operation_repo=wallet_operation_repo,
+    )
+    wallet_usecase = WalletUsecase(
+        app_db=_db,
+        user_repo=user_repo,
+        wallet_repo=wallet_repo,
+        wallet_operation_repo=wallet_operation_repo,
+    )
     app = init_app(
-        db=db,
-        routes=[
-            users_routes,
-            wallets_routes
-        ]
+        connect_db=connect_db,
+        disconnect_db=disconnect_db,
+        routes=[users_routes, wallets_routes],
+        user_usecase=user_usecase,
+        wallet_usecase=wallet_usecase,
     )
     return app
 

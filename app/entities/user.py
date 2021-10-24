@@ -3,6 +3,16 @@ from pydantic import BaseModel, EmailStr, condecimal
 from .currency import CurrencyEnum
 
 
+class UserDoesNotExist(Exception):
+    """Exception for user does not exist error"""
+
+
+class CreateUser(BaseModel):
+    """Parameters description for user creation."""
+
+    email: EmailStr
+
+
 class BaseUser(BaseModel):
     """Baseentity for User."""
 

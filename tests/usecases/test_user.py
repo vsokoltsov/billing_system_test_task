@@ -15,7 +15,7 @@ async def test_success_user_create_usecase(test_db):
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = UserUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repo,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repo,
@@ -47,7 +47,7 @@ async def test_failed_user_create_usecase_user(test_db):
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = UserUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repo,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repo,
@@ -65,7 +65,7 @@ async def test_failed_user_create_usecase_wallet(test_db, wallet_repository_mock
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = UserUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repo,
         wallet_repo=wallet_repository_mock,
         wallet_operation_repo=wallet_operation_repo,
@@ -85,7 +85,7 @@ async def test_failed_user_create_usecase_rollback_previous(
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = UserUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repo,
         wallet_repo=wallet_repository_mock,
         wallet_operation_repo=wallet_operation_repo,
@@ -111,7 +111,7 @@ async def test_failed_user_create_usecase_wallet_operation(
     wallet_repo = WalletRepository(db=test_db)
 
     usecase = UserUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repo,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repository_mock,
@@ -143,7 +143,7 @@ async def test_failed_user_create_usecase_user_retrieve(
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = UserUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repository_mock,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repo,

@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
 from decimal import Decimal
 from typing import Optional
-from databases import Database
+
 from app.adapters.sql.models import wallets
 from app.entities.wallet import WalletEntity
+
 from .base import BaseRepository
+
 
 class AbstractWalletRepository(ABC):
     """Represents interface for wallet repository"""
@@ -51,7 +53,9 @@ class AbstractWalletRepository(ABC):
         ...
 
     @abstractmethod
-    async def transfer(self, source_wallet_id: int, destination_wallet_id: int, amount: Decimal) -> int:
+    async def transfer(
+        self, source_wallet_id: int, destination_wallet_id: int, amount: Decimal
+    ) -> int:
         """
         Transfer amount of currency between wallets.
 
@@ -66,17 +70,20 @@ class AbstractWalletRepository(ABC):
 class WalletRepository(BaseRepository, AbstractWalletRepository):
     """Implementation of wallet repository."""
 
-    async def get_by_id(self, wallet_id: int) -> WalletEntity:
+    async def get_by_id(self, wallet_id: int) -> Optional[WalletEntity]:
         """
         Retrieve wallet record by wallet id.
 
         :param wallet_id: ID of use
         :returns: Wallet schema
         """
+
         wallet_query = wallets.select().where(wallets.c.id == wallet_id)
         wallet = await self._db.fetch_one(wallet_query)
         if wallet:
             return WalletEntity(**wallet)
+
+        return None
 
     async def get_by_user_id(self, user_id: int) -> Optional[WalletEntity]:
         """
@@ -89,6 +96,8 @@ class WalletRepository(BaseRepository, AbstractWalletRepository):
         wallet = await self._db.fetch_one(wallet_query)
         if wallet:
             return WalletEntity(**wallet)
+
+        return None
 
     async def create(self, user_id: int) -> int:
         """
@@ -118,7 +127,9 @@ class WalletRepository(BaseRepository, AbstractWalletRepository):
         )
         return await self._db.execute(query)
 
-    async def transfer(self, source_wallet_id: int, destination_wallet_id: int, amount: Decimal) -> int:
+    async def transfer(
+        self, source_wallet_id: int, destination_wallet_id: int, amount: Decimal
+    ) -> int:
         """
         Transfer amount of currency between wallets.
 

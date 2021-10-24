@@ -1,8 +1,10 @@
-import pytest
 from decimal import Decimal
+
 import asyncpg.exceptions as aioexceptions
-from app.repositories.wallet import WalletRepository
+import pytest
+
 from app.entities.wallet import WalletEntity
+from app.repositories.wallet import WalletRepository
 
 
 @pytest.mark.asyncio
@@ -32,11 +34,9 @@ async def test_success_receiving_wallet_by_user_id(test_db, wallet_factory):
 
     wallet = await wallet_factory.create()
     repository = WalletRepository(db=test_db)
-    wallet: WalletEntity = (
-        await repository.get_by_user_id(user_id=wallet.user_id)
-    )
+    wallet: WalletEntity = await repository.get_by_user_id(user_id=wallet.user_id)
     assert wallet is not None
-    assert wallet.balance == Decimal('100.0')
+    assert wallet.balance == Decimal("100.0")
 
 
 @pytest.mark.asyncio
@@ -54,11 +54,10 @@ async def test_success_receiving_wallet_by_id(test_db, wallet_factory):
 
     wallet = await wallet_factory.create()
     repository = WalletRepository(db=test_db)
-    wallet: WalletEntity = (
-        await repository.get_by_id(wallet_id=wallet.id)
-    )
+    wallet: WalletEntity = await repository.get_by_id(wallet_id=wallet.id)
     assert wallet is not None
-    assert wallet.balance == Decimal('100.0')
+    assert wallet.balance == Decimal("100.0")
+
 
 @pytest.mark.asyncio
 async def test_failed_receiving_wallet_by_id(test_db, wallet_factory):
@@ -77,9 +76,9 @@ async def test_success_wallet_enroll(test_db, wallet_factory):
     wallet = await wallet_factory.create()
     repository = WalletRepository(db=test_db)
     old_wallet = await repository.get_by_user_id(user_id=wallet.user_id)
-    await repository.enroll(wallet_id=wallet.id, amount=Decimal('10.0'))
+    await repository.enroll(wallet_id=wallet.id, amount=Decimal("10.0"))
     wallet = await repository.get_by_user_id(user_id=wallet.user_id)
-    assert wallet.balance == old_wallet.balance + Decimal('10.0')
+    assert wallet.balance == old_wallet.balance + Decimal("10.0")
 
 
 @pytest.mark.asyncio
@@ -87,7 +86,7 @@ async def test_failed_wallet_enroll(test_db):
     """Test failed wallet enroll (wallet does not exists)"""
 
     repository = WalletRepository(db=test_db)
-    wallet_id = await repository.enroll(wallet_id=1, amount=Decimal('10.0'))
+    wallet_id = await repository.enroll(wallet_id=1, amount=Decimal("10.0"))
     assert wallet_id is None
 
 
@@ -101,12 +100,12 @@ async def test_success_wallet_transfer(test_db, wallet_factory):
     await repository.transfer(
         source_wallet_id=wallet_1.id,
         destination_wallet_id=wallet_2.id,
-        amount=Decimal('10')
+        amount=Decimal("10"),
     )
     refreshed_wallet_1 = await repository.get_by_id(wallet_1.id)
     refreshed_wallet_2 = await repository.get_by_id(wallet_2.id)
-    assert refreshed_wallet_1.balance == wallet_1.balance - Decimal('10')
-    assert refreshed_wallet_2.balance == wallet_2.balance + Decimal('10')
+    assert refreshed_wallet_1.balance == wallet_1.balance - Decimal("10")
+    assert refreshed_wallet_2.balance == wallet_2.balance + Decimal("10")
 
 
 @pytest.mark.asyncio
@@ -120,7 +119,5 @@ async def test_failed_wallet_transfer(test_db, wallet_factory):
     repository = WalletRepository(db=test_db)
     with pytest.raises(ValueError):
         await repository.transfer(
-            source_wallet_id=1,
-            destination_wallet_id=wallet_2.id,
-            amount=Decimal('10')
+            source_wallet_id=1, destination_wallet_id=wallet_2.id, amount=Decimal("10")
         )

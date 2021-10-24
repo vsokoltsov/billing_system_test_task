@@ -36,6 +36,7 @@ wallets = sa.Table(
     sa.Column(
         "currency", sa.String, server_default=CurrencyEnum.USD.value, nullable=False
     ),
+    sa.CheckConstraint("amount >= 0", name="operations_positive_amount"),
 )
 
 wallet_operations = sa.Table(
@@ -51,4 +52,5 @@ wallet_operations = sa.Table(
         nullable=False,
         server_default="0",
     ),
+    sa.CheckConstraint("balance >= 0", name="wallet_positive_balance"),
 )

@@ -13,7 +13,7 @@ async def test_success_wallet_operation_creation(test_db):
 
     repository = WalletOperationRepository(db=test_db)
     wallet_operation_id = await repository.create(
-        operation=Operations.create,
+        operation=Operations.CREATE,
         wallet_from=1,
         wallet_to=2,
         amount=Decimal("100.00"),
@@ -28,7 +28,7 @@ async def test_failed_wallet_operation_creation(test_db):
     repository = WalletOperationRepository(db=test_db)
     with pytest.raises(CheckViolationError):
         await repository.create(
-            operation=Operations.create,
+            operation=Operations.CREATE,
             wallet_from=1,
             wallet_to=2,
             amount=Decimal("-100.00"),

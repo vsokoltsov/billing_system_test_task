@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from databases import Database
 from sqlalchemy.sql import select
 
 from app.adapters.sql.models import users, wallets
 from app.entities.user import User
+
 from .base import BaseRepository
 
 

@@ -25,10 +25,10 @@ class AbstractWalletUsecase(ABC):
         """
         ...
 
-
-
     @abstractmethod
-    async def transfer(self, source_wallet_id: int, destination_wallet_id: int, amount: Decimal) -> User:
+    async def transfer(
+        self, source_wallet_id: int, destination_wallet_id: int, amount: Decimal
+    ) -> User:
         """
         Transferfunds between wallets
 
@@ -45,12 +45,12 @@ class WalletUsecase(AbstractWalletUsecase):
     def __init__(
         self,
         *,
-        db: Database,
+        app_db: Database,
         user_repo: AbstractUserRepository,
         wallet_repo: AbstractWalletRepository,
         wallet_operation_repo: AbstractWalletOperationRepository
     ):
-        self._db = db
+        self._db = app_db
         self.user_repo = user_repo
         self.wallet_repo = wallet_repo
         self.wallet_operation_repo = wallet_operation_repo
@@ -78,7 +78,7 @@ class WalletUsecase(AbstractWalletUsecase):
 
                 # Create wallet operation for 'debit'
                 await self.wallet_operation_repo.create(
-                    operation=Operations.deposit,
+                    operation=Operations.DEPOSIT,
                     wallet_from=None,
                     wallet_to=wallet_id,
                     amount=amount,
@@ -90,8 +90,9 @@ class WalletUsecase(AbstractWalletUsecase):
                     raise UserDoesNotExist("User does not exists")
                 return user
 
-
-    async def transfer(self, source_wallet_id: int, destination_wallet_id: int, amount: Decimal) -> User:
+    async def transfer(
+        self, source_wallet_id: int, destination_wallet_id: int, amount: Decimal
+    ) -> User:
         """
         Transferfunds between wallets
 
@@ -120,25 +121,23 @@ class WalletUsecase(AbstractWalletUsecase):
                 source_wallet_id = await self.wallet_repo.transfer(
                     source_wallet_id=source_wallet_id,
                     destination_wallet_id=destination_wallet_id,
-                    amount=amount
+                    amount=amount,
                 )
 
                 await self.wallet_operation_repo.create(
-                    operation=Operations.withdrawal,
+                    operation=Operations.WITHDRAWAL,
                     wallet_from=source_wallet_id,
                     wallet_to=destination_wallet_id,
-                    amount=amount
+                    amount=amount,
                 )
                 await self.wallet_operation_repo.create(
-                    operation=Operations.deposit,
+                    operation=Operations.DEPOSIT,
                     wallet_from=destination_wallet_id,
                     wallet_to=source_wallet_id,
-                    amount=amount
+                    amount=amount,
                 )
 
-                user = await self.user_repo.get_by_wallet_id(
-                    wallet_id=source_wallet_id
-                )
+                user = await self.user_repo.get_by_wallet_id(wallet_id=source_wallet_id)
                 if not user:
                     raise UserDoesNotExist("User does not exist")
                 return user

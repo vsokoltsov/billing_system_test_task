@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import pytest
 
-from app.entities.user import User, UserDoesNotExist
+from app.entities.user import UserDoesNotExist
 from app.entities.wallet import WalletDoesNotExist
 from app.repositories.users import UserRepository
 from app.repositories.wallet import WalletRepository
@@ -22,7 +22,7 @@ async def test_success_wallet_enroll_usecase(test_db, user_factory, wallet_facto
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = WalletUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repo,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repo,
@@ -45,7 +45,7 @@ async def test_failed_wallet_enroll_usecase_get_user(
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = WalletUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repository_mock,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repo,
@@ -70,7 +70,7 @@ async def test_failed_wallet_enroll_usecase_get_user_response(
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = WalletUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repository_mock,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repo,
@@ -96,7 +96,7 @@ async def test_failed_wallet_enroll_usecase(
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = WalletUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repo,
         wallet_repo=wallet_repository_mock,
         wallet_operation_repo=wallet_operation_repo,
@@ -123,7 +123,7 @@ async def test_failed_wallet_enroll_usecase_wallet_operation(
     wallet_repo = WalletRepository(db=test_db)
 
     usecase = WalletUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repo,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repository_mock,
@@ -152,7 +152,7 @@ async def test_success_wallet_transfer_usecase(test_db, user_factory, wallet_fac
     wo_count = await test_db.execute("select count(*) from wallet_operations;")
 
     usecase = WalletUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repo,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repo,
@@ -160,7 +160,7 @@ async def test_success_wallet_transfer_usecase(test_db, user_factory, wallet_fac
     new_user = await usecase.transfer(
         source_wallet_id=wallet_1.id,
         destination_wallet_id=wallet_2.id,
-        amount=Decimal("10.0")
+        amount=Decimal("10.0"),
     )
     new_wo_count = await test_db.execute("select count(*) from wallet_operations;")
     new_wallet_2 = await wallet_repo.get_by_id(wallet_id=wallet_2.id)
@@ -168,8 +168,11 @@ async def test_success_wallet_transfer_usecase(test_db, user_factory, wallet_fac
     assert new_wallet_2.balance == wallet_2.balance + Decimal("10.0")
     assert new_wo_count == wo_count + 2
 
+
 @pytest.mark.asyncio
-async def test_failed_wallet_transfer_usecas_amount(test_db, user_factory, wallet_factory):
+async def test_failed_wallet_transfer_usecas_amount(
+    test_db, user_factory, wallet_factory
+):
     """Test failed wallet enroll usecase (amount not sufficient)"""
 
     base_user_1 = await user_factory.create()
@@ -183,7 +186,7 @@ async def test_failed_wallet_transfer_usecas_amount(test_db, user_factory, walle
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = WalletUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repo,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repo,
@@ -192,15 +195,18 @@ async def test_failed_wallet_transfer_usecas_amount(test_db, user_factory, walle
         await usecase.transfer(
             source_wallet_id=wallet_1.id,
             destination_wallet_id=wallet_2.id,
-            amount=Decimal("0.0")
+            amount=Decimal("0.0"),
         )
     new_user = await user_repo.get_by_id(base_user_1.id)
     new_wallet_2 = await wallet_repo.get_by_id(wallet_id=wallet_2.id)
     assert new_user.balance == wallet_1.balance
     assert new_wallet_2.balance == wallet_2.balance
 
+
 @pytest.mark.asyncio
-async def test_failed_wallet_transfer_usecase_source_wallet_none(test_db, user_factory, wallet_factory, wallet_repository_mock):
+async def test_failed_wallet_transfer_usecase_source_wallet_none(
+    test_db, user_factory, wallet_factory, wallet_repository_mock
+):
     """Test failed wallet enroll usecase (source wallet does not exists)"""
 
     wallet_repository_mock.get_by_id.return_value = None
@@ -216,7 +222,7 @@ async def test_failed_wallet_transfer_usecase_source_wallet_none(test_db, user_f
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = WalletUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repo,
         wallet_repo=wallet_repository_mock,
         wallet_operation_repo=wallet_operation_repo,
@@ -225,24 +231,24 @@ async def test_failed_wallet_transfer_usecase_source_wallet_none(test_db, user_f
         await usecase.transfer(
             source_wallet_id=wallet_1.id,
             destination_wallet_id=wallet_2.id,
-            amount=Decimal("10.0")
+            amount=Decimal("10.0"),
         )
     new_user = await user_repo.get_by_id(base_user_1.id)
     new_wallet_2 = await wallet_repo.get_by_id(wallet_id=wallet_2.id)
     assert new_user.balance == wallet_1.balance
     assert new_wallet_2.balance == wallet_2.balance
 
+
 @pytest.mark.asyncio
-async def test_failed_wallet_transfer_usecase_destination_wallet_none(test_db, user_factory, wallet_factory, wallet_repository_mock):
+async def test_failed_wallet_transfer_usecase_destination_wallet_none(
+    test_db, user_factory, wallet_factory, wallet_repository_mock
+):
     """Test failed wallet enroll usecase (destination wallet does not exists)"""
 
     base_user_1 = await user_factory.create()
     wallet_1 = await wallet_factory.create(user_id=base_user_1.id)
 
-    wallet_repository_mock.get_by_id.side_effect = [
-        wallet_1,
-        None
-    ]
+    wallet_repository_mock.get_by_id.side_effect = [wallet_1, None]
 
     base_user_2 = await user_factory.create()
     wallet_2 = await wallet_factory.create(user_id=base_user_2.id)
@@ -252,7 +258,7 @@ async def test_failed_wallet_transfer_usecase_destination_wallet_none(test_db, u
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = WalletUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repo,
         wallet_repo=wallet_repository_mock,
         wallet_operation_repo=wallet_operation_repo,
@@ -261,7 +267,7 @@ async def test_failed_wallet_transfer_usecase_destination_wallet_none(test_db, u
         await usecase.transfer(
             source_wallet_id=wallet_1.id,
             destination_wallet_id=wallet_2.id,
-            amount=Decimal("10.0")
+            amount=Decimal("10.0"),
         )
     new_user = await user_repo.get_by_id(base_user_1.id)
     new_wallet_2 = await wallet_repo.get_by_id(wallet_id=wallet_2.id)
@@ -270,7 +276,9 @@ async def test_failed_wallet_transfer_usecase_destination_wallet_none(test_db, u
 
 
 @pytest.mark.asyncio
-async def test_failed_wallet_transfer_usecase_user_none(test_db, user_factory, wallet_factory, user_repository_mock):
+async def test_failed_wallet_transfer_usecase_user_none(
+    test_db, user_factory, wallet_factory, user_repository_mock
+):
     """Test failed wallet enroll usecase. (user is none)"""
 
     base_user_1 = await user_factory.create()
@@ -285,7 +293,7 @@ async def test_failed_wallet_transfer_usecase_user_none(test_db, user_factory, w
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = WalletUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repository_mock,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repo,
@@ -294,15 +302,18 @@ async def test_failed_wallet_transfer_usecase_user_none(test_db, user_factory, w
         await usecase.transfer(
             source_wallet_id=wallet_1.id,
             destination_wallet_id=wallet_2.id,
-            amount=Decimal("10.0")
+            amount=Decimal("10.0"),
         )
     new_user = await user_repo.get_by_id(base_user_1.id)
     new_wallet_2 = await wallet_repo.get_by_id(wallet_id=wallet_2.id)
     assert new_user.balance == wallet_1.balance
     assert new_wallet_2.balance == wallet_2.balance
 
+
 @pytest.mark.asyncio
-async def test_failed_wallet_transfer_usecase_transfe(test_db, user_factory, wallet_factory, wallet_repository_mock):
+async def test_failed_wallet_transfer_usecase_transfe(
+    test_db, user_factory, wallet_factory, wallet_repository_mock
+):
     """Test failed wallet enroll usecase (transfer error)."""
 
     base_user_1 = await user_factory.create()
@@ -313,17 +324,12 @@ async def test_failed_wallet_transfer_usecase_transfe(test_db, user_factory, wal
 
     user_repo = UserRepository(db=test_db)
     wallet_repo = WalletRepository(db=test_db)
-    wallet_repository_mock.get_by_id.side_effect = [
-        wallet_1,
-        wallet_2
-    ]
-    wallet_repository_mock.transfer.side_effect = [
-        ValueError("Transfer error")
-    ]
+    wallet_repository_mock.get_by_id.side_effect = [wallet_1, wallet_2]
+    wallet_repository_mock.transfer.side_effect = [ValueError("Transfer error")]
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = WalletUsecase(
-        db=test_db,
+        app_db=test_db,
         user_repo=user_repo,
         wallet_repo=wallet_repository_mock,
         wallet_operation_repo=wallet_operation_repo,
@@ -332,7 +338,7 @@ async def test_failed_wallet_transfer_usecase_transfe(test_db, user_factory, wal
         await usecase.transfer(
             source_wallet_id=wallet_1.id,
             destination_wallet_id=wallet_2.id,
-            amount=Decimal("10.0")
+            amount=Decimal("10.0"),
         )
     new_user = await user_repo.get_by_id(base_user_1.id)
     new_wallet_2 = await wallet_repo.get_by_id(wallet_id=wallet_2.id)

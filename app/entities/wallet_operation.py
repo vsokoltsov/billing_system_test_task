@@ -4,10 +4,11 @@ from pydantic import BaseModel, condecimal
 
 
 class Operations(Enum):
-    retrieve = "retrieve"
-    create = "create"
-    receipt = "receipt"
-    debit = "debit"
+    """Possible operations for wallet operation"""
+
+    DEPOSIT = "DEPOSIT"
+    WITHDRAWAL = "WITHDRAWAL"
+    CREATE = "CREATE"
 
 
 class WalletOperationEntity(BaseModel):
@@ -17,4 +18,4 @@ class WalletOperationEntity(BaseModel):
     operation: Operations
     wallet_from: int
     wallet_to: int
-    amount: condecimal(ge=0)
+    amount: condecimal(ge=0)  # type: ignore
