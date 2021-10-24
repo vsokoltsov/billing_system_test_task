@@ -31,9 +31,8 @@ check:
 	@exec isort --check-only .
 	@echo "Run black"
 	@exec black --check --diff app tests
-	@echo "Run flake"
+	@echo "Run pylint"
 	@exec pylint app tests
-	@exec vulture app
 	@echo "Run mypy"
 	@exec mypy app
 	@exec rm -rf .mypy_cache

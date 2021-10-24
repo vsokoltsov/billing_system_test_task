@@ -11,6 +11,7 @@ from app.adapters.sql.models import users, wallet_operations, wallets
 from app.api import users_routes, wallets_routes
 from app.entities.user import BaseUser
 from app.entities.wallet import WalletEntity
+
 # pylint: disable=no-name-in-module
 from app.main import init_app
 from app.repositories.users import UserRepository
