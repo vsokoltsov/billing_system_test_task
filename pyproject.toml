@@ -1,3 +1,31 @@
+[tool.black]
+line-length = 100
+target-version = ['py39']
+include = '\.pyi?$'
+
+[tool.vulture]
+min_confidence = 70
+sort_by_size = true
+
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+include_trailing_comma = true
+indent='    '
+sections = ['FUTURE','STDLIB','THIRDPARTY','FIRSTPARTY','LOCALPROJECT','LOCALFOLDER']
+default_section = 'THIRDPARTY'
+known_standard_library = []
+known_localproject = ['app','tests']
+
+[tool.pytest.ini_options]
+env_override_existing_values = 0
+env_files = [".env", ".env.test"]
+filterwarnings = [
+    'ignore'
+]
+
+
 [tool.poetry]
 name = "billing_system_test_task"
 version = "1.0.1"
@@ -37,6 +65,7 @@ isort = "^5.9.3"
 httpx = "^0.20.0"
 requests = "^2.26.0"
 bandit = "^1.7.0"
+mock = "^4.0.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

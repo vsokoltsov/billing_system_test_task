@@ -25,16 +25,26 @@ test:
 		&& make alembic-upgrade \
 		&& py.test -svvv -rs --cov app --cov-report term-missing
 
+.PHONY: check
+check:
+	@echo "Run isort"
+	@exec isort --check-only .
+	@echo "Run black"
+	@exec black --check --diff app tests
+	@echo "Run pylint"
+	@exec pylint app tests
+	@echo "Run mypy"
+	@exec mypy app
+	@exec rm -rf .mypy_cache
+
 .PHONY: lint
 lint:
 	@echo "* Run isort"
 	@exec isort .
 	@echo "* Run black"
-	@exec black app
+	@exec black app tests
 	@echo "* Run pylint"
-	@exec pylint app
-	# @echo "* Run bandit"
-	# @exec bandit -r app/*
+	@exec pylint app tests
 	@echo "* Run mypy"
 	@exec mypy app
 	@exec rm -rf .mypy_cache
