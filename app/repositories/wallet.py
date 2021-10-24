@@ -108,7 +108,8 @@ class WalletRepository(BaseRepository, AbstractWalletRepository):
         """
 
         wallet_query = wallets.insert().values({"user_id": user_id})
-        return await self._db.execute(wallet_query)
+        wallet_id: int = await self._db.execute(wallet_query)
+        return wallet_id
 
     async def enroll(self, wallet_id: int, amount: Decimal) -> int:
         """
@@ -125,7 +126,8 @@ class WalletRepository(BaseRepository, AbstractWalletRepository):
             .values({"balance": wallets.c.balance + amount})
             .returning(wallets.c.id)
         )
-        return await self._db.execute(query)
+        w_id: int = await self._db.execute(query)
+        return w_id
 
     async def transfer(
         self, source_wallet_id: int, destination_wallet_id: int, amount: Decimal
@@ -150,7 +152,7 @@ class WalletRepository(BaseRepository, AbstractWalletRepository):
             .where(wallets.c.id == destination_wallet_id)
             .values({"balance": wallets.c.balance + amount})
         )
-        wallet_id = await self._db.execute(source_query)
+        wallet_id: int = await self._db.execute(source_query)
         if not wallet_id:
             raise ValueError("Source wallet id does not exist")
         await self._db.execute(target_query)

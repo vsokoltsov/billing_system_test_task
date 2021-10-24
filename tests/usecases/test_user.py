@@ -75,9 +75,7 @@ async def test_failed_user_create_usecase_wallet(test_db, wallet_repository_mock
 
 
 @pytest.mark.asyncio
-async def test_failed_user_create_usecase_rollback_previous(
-    test_db, wallet_repository_mock
-):
+async def test_failed_user_create_usecase_rollback_previous(test_db, wallet_repository_mock):
     """Test failed user create usecase. (wallet was not created)"""
 
     wallet_repository_mock.create.side_effect = [ValueError("wallet was not created")]
@@ -135,9 +133,7 @@ async def test_failed_user_create_usecase_user_retrieve(
 
     user = await user_factory.create()
     user_repository_mock.create.return_value = user.id
-    user_repository_mock.get_by_id.side_effect = [
-        ValueError("Error database connection")
-    ]
+    user_repository_mock.get_by_id.side_effect = [ValueError("Error database connection")]
 
     wallet_repo = WalletRepository(db=test_db)
     wallet_operation_repo = WalletOperationRepository(db=test_db)

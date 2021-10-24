@@ -48,7 +48,7 @@ class WalletUsecase(AbstractWalletUsecase):
         app_db: Database,
         user_repo: AbstractUserRepository,
         wallet_repo: AbstractWalletRepository,
-        wallet_operation_repo: AbstractWalletOperationRepository
+        wallet_operation_repo: AbstractWalletOperationRepository,
     ):
         self._db = app_db
         self.user_repo = user_repo
@@ -72,9 +72,7 @@ class WalletUsecase(AbstractWalletUsecase):
                     raise UserDoesNotExist("User does not exists")
 
                 # Enroll user's wallet
-                wallet_id = await self.wallet_repo.enroll(
-                    wallet_id=user.wallet_id, amount=amount
-                )
+                wallet_id = await self.wallet_repo.enroll(wallet_id=user.wallet_id, amount=amount)
 
                 # Create wallet operation for 'debit'
                 await self.wallet_operation_repo.create(
@@ -106,9 +104,7 @@ class WalletUsecase(AbstractWalletUsecase):
                 if amount <= 0:
                     raise ValueError("Insufficient amount")
 
-                source_wallet = await self.wallet_repo.get_by_id(
-                    wallet_id=source_wallet_id
-                )
+                source_wallet = await self.wallet_repo.get_by_id(wallet_id=source_wallet_id)
                 if not source_wallet:
                     raise WalletDoesNotExist("Source wallet does not exists")
 

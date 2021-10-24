@@ -30,12 +30,8 @@ wallets = sa.Table(
         nullable=False,
         unique=True,
     ),
-    sa.Column(
-        "balance", sa.Numeric(10, 2, asdecimal=True), nullable=False, server_default="0"
-    ),
-    sa.Column(
-        "currency", sa.String, server_default=CurrencyEnum.USD.value, nullable=False
-    ),
+    sa.Column("balance", sa.Numeric(10, 2, asdecimal=True), nullable=False, server_default="0"),
+    sa.Column("currency", sa.String, server_default=CurrencyEnum.USD.value, nullable=False),
     sa.CheckConstraint("amount >= 0", name="operations_positive_amount"),
 )
 

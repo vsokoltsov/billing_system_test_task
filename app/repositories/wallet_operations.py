@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from decimal import Decimal
+from typing import Optional
 
 from app.adapters.sql.models import wallet_operations
 from app.entities.wallet_operation import Operations
@@ -18,7 +19,7 @@ class AbstractWalletOperationRepository(ABC):
         amount: Decimal,
         wallet_from: int = None,
         wallet_to: int = None,
-    ) -> int:
+    ) -> Optional[int]:
         """
         Creates new wallet operation instance.
 
@@ -64,4 +65,5 @@ class WalletOperationRepository(BaseRepository, AbstractWalletOperationRepositor
             )
             .returning(wallet_operations.c.id)
         )
-        return await self._db.execute(operations_query)
+        wallet_operation_id: int = await self._db.execute(operations_query)
+        return wallet_operation_id

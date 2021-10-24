@@ -89,7 +89,5 @@ async def test_failed_user_enroll_wrong_amount_type(client, wallet_factory):
 
     wallet = await wallet_factory.create()
 
-    res = await client.put(
-        f"/api/users/{wallet.user_id}/enroll", json={"amount": "abc"}
-    )
+    res = await client.put(f"/api/users/{wallet.user_id}/enroll", json={"amount": "abc"})
     assert res.status_code == 422

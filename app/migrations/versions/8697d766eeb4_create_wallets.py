@@ -33,9 +33,7 @@ def upgrade():
             unique=True,
         ),
         sa.Column("balance", NUMERIC(10, 2), nullable=False, server_default="0"),
-        sa.Column(
-            "currency", sa.String, server_default=CurrencyEnum.USD.value, nullable=False
-        ),
+        sa.Column("currency", sa.String, server_default=CurrencyEnum.USD.value, nullable=False),
         CheckConstraint("balance >= 0", name="wallet_positive_balance"),
     )
 

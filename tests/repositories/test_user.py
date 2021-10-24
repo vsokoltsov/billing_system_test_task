@@ -46,9 +46,7 @@ async def test_success_user_by_id_receiving(test_db, user_factory, wallet_factor
     repository = UserRepository(db=test_db)
     # user_id = await user_factory.create(email="example@mail.com")
     factory_user = await user_factory.create(email="example@mail.com")
-    wallet = await wallet_factory.create(
-        user_id=factory_user.id, balance=Decimal("100")
-    )
+    wallet = await wallet_factory.create(user_id=factory_user.id, balance=Decimal("100"))
 
     user = await repository.get_by_id(factory_user.id)
     assert user is not None

@@ -109,5 +109,5 @@ class UserRepository(BaseRepository, AbstractUserRepository):
 
         if not email:
             raise ValueError("email is empty")
-        user_id = await self._db.execute(users.insert(), values={"email": email})
+        user_id: int = await self._db.execute(query=users.insert(), values={"email": email})
         return user_id

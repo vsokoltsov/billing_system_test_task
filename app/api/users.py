@@ -42,13 +42,9 @@ async def enroll(request: Request, user_id: int, params: WalletEnrollParams):
         )
         return user
     except UserDoesNotExist as user_not_exist:
-        raise HTTPException(
-            status_code=404, detail="User does not exists"
-        ) from user_not_exist
+        raise HTTPException(status_code=404, detail="User does not exists") from user_not_exist
     except AssertionError as assert_err:
-        raise HTTPException(
-            status_code=400, detail="Balance was not updated"
-        ) from assert_err
+        raise HTTPException(status_code=400, detail="Balance was not updated") from assert_err
     except ValidationError as validation_err:
         raise HTTPException(
             status_code=400, detail=f"Error of response: {validation_err}"

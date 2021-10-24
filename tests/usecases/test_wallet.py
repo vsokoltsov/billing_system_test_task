@@ -170,9 +170,7 @@ async def test_success_wallet_transfer_usecase(test_db, user_factory, wallet_fac
 
 
 @pytest.mark.asyncio
-async def test_failed_wallet_transfer_usecas_amount(
-    test_db, user_factory, wallet_factory
-):
+async def test_failed_wallet_transfer_usecas_amount(test_db, user_factory, wallet_factory):
     """Test failed wallet enroll usecase (amount not sufficient)"""
 
     base_user_1 = await user_factory.create()

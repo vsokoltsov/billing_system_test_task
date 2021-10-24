@@ -33,7 +33,7 @@ class UserUsecase(AbstractUserUsecase):
         app_db: Database,
         user_repo: AbstractUserRepository,
         wallet_repo: AbstractWalletRepository,
-        wallet_operation_repo: AbstractWalletOperationRepository
+        wallet_operation_repo: AbstractWalletOperationRepository,
     ):
         self._db = app_db
         self.user_repo = user_repo
