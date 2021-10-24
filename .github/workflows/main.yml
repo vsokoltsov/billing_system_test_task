@@ -47,7 +47,12 @@ jobs:
 
       - name: Run tests
         env:
-          BILLING_DB_DSN: postgresql://user:password@localhost:5432/billing_test
+          DB_HOST: postgres
+          DB_PORT: 5432
+          POSTGRES_PASSWORD: password
+          POSTGRES_USER: user
+          POSTGRES_DB: billing_test
+          BILLING_DB_DSN: postgresql://user:password@postgres:5432/billing_test
 
         run: |
           touch .env.test
