@@ -14,4 +14,8 @@ Based on [Clean Architecture](https://github.com/Sairyss/domain-driven-hexagon) 
 ## Tests
 
 * `docker-compose -f docker-compose.test.yml up -d`
-* `docker-compose run billing bash -c "pytest -v"`
+* `make test`
+
+## Lint
+
+* `make lint`
