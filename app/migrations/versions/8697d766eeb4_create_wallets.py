@@ -12,7 +12,7 @@ from alembic import op
 from sqlalchemy import CheckConstraint
 from sqlalchemy.dialects.postgresql import NUMERIC
 
-from app.models.wallet import CurrencyEnum
+from app.entities.currency import CurrencyEnum
 
 # revision identifiers, used by Alembic.
 revision = "8697d766eeb4"
