@@ -9,13 +9,13 @@ from mock import AsyncMock
 from app.adapters.sql.db import connect_db, disconnect_db, get_db
 from app.adapters.sql.models import users, wallet_operations, wallets
 from app.adapters.sql.tx import SQLTransactionManager
-from app.api import users_routes, wallets_routes
 
 # pylint: disable=no-name-in-module
 from app.main import init_app
 from app.repositories.users import UserRepository
 from app.repositories.wallet import WalletRepository
 from app.repositories.wallet_operations import WalletOperationRepository
+from app.transport.http import api_router
 from app.usecases.user import UserUsecase
 from app.usecases.wallet import WalletUsecase
 from tests.factories import UserFactory, WalletFactory
@@ -122,7 +122,7 @@ async def client(test_db_instance) -> AsyncGenerator:
     app = init_app(
         connect_db=connect_db,
         disconnect_db=disconnect_db,
-        routes=[users_routes, wallets_routes],
+        router=api_router,
         user_usecase=user_usecase,
         wallet_usecase=wallet_usecase,
     )

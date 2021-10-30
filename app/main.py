@@ -1,4 +1,4 @@
-from typing import Callable, List
+from typing import Callable
 
 import uvicorn
 from fastapi import APIRouter, FastAPI
@@ -6,10 +6,10 @@ from fastapi import APIRouter, FastAPI
 from app import settings
 from app.adapters.sql.db import connect_db, disconnect_db, get_db
 from app.adapters.sql.tx import SQLTransactionManager
-from app.api import users_routes, wallets_routes
 from app.repositories.users import UserRepository
 from app.repositories.wallet import WalletRepository
 from app.repositories.wallet_operations import WalletOperationRepository
+from app.transport.http import api_router
 from app.usecases.user import AbstractUserUsecase, UserUsecase
 from app.usecases.wallet import AbstractWalletUsecase, WalletUsecase
 
@@ -17,7 +17,7 @@ from app.usecases.wallet import AbstractWalletUsecase, WalletUsecase
 def init_app(
     connect_db: Callable,
     disconnect_db: Callable,
-    routes: List[APIRouter],
+    router: APIRouter,
     user_usecase: AbstractUserUsecase,
     wallet_usecase: AbstractWalletUsecase,
 ) -> FastAPI:
@@ -26,8 +26,7 @@ def init_app(
     app = FastAPI(title="Billing system sample")
     app.add_event_handler("startup", connect_db)
     app.add_event_handler("shutdown", disconnect_db)
-    for route in routes:
-        app.include_router(route, prefix="/api")
+    app.include_router(router)
     app.state.user_usecase = user_usecase
     app.state.wallet_usecase = wallet_usecase
     return app
@@ -56,7 +55,7 @@ def run_app():
     app = init_app(
         connect_db=connect_db,
         disconnect_db=disconnect_db,
-        routes=[users_routes, wallets_routes],
+        router=api_router,
         user_usecase=user_usecase,
         wallet_usecase=wallet_usecase,
     )
