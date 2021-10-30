@@ -8,11 +8,11 @@ async def test_success_wallet_transfer(client, test_db, user_factory, wallet_fac
     """Test success wallet transfer."""
 
     user_repo = UserRepository(db=test_db)
-    base_user_1 = await user_factory.create()
-    wallet_1 = await wallet_factory.create(user_id=base_user_1.id)
+    base_user_1 = user_factory.create()
+    wallet_1 = wallet_factory.create(user=base_user_1)
 
-    base_user_2 = await user_factory.create()
-    wallet_2 = await wallet_factory.create(user_id=base_user_2.id)
+    base_user_2 = user_factory.create()
+    wallet_2 = wallet_factory.create(user=base_user_2)
 
     params = {
         "wallet_from": wallet_1.id,
@@ -36,11 +36,11 @@ async def test_failed_wallet_transfer_amount_is_negative(
     """Test failed wallet transfer (amount field is negative)."""
 
     user_repo = UserRepository(db=test_db)
-    base_user_1 = await user_factory.create()
-    wallet_1 = await wallet_factory.create(user_id=base_user_1.id)
+    base_user_1 = user_factory.create()
+    wallet_1 = wallet_factory.create(user=base_user_1)
 
-    base_user_2 = await user_factory.create()
-    wallet_2 = await wallet_factory.create(user_id=base_user_2.id)
+    base_user_2 = user_factory.create()
+    wallet_2 = wallet_factory.create(user=base_user_2)
 
     params = {
         "wallet_from": wallet_1.id,
@@ -64,11 +64,11 @@ async def test_failed_wallet_transfer_params_are_empty(
     """Test failed wallet transfer (amount field is negative)."""
 
     user_repo = UserRepository(db=test_db)
-    base_user_1 = await user_factory.create()
-    await wallet_factory.create(user_id=base_user_1.id)
+    base_user_1 = user_factory.create()
+    wallet_factory.create(user=base_user_1)
 
-    base_user_2 = await user_factory.create()
-    await wallet_factory.create(user_id=base_user_2.id)
+    base_user_2 = user_factory.create()
+    wallet_factory.create(user=base_user_2)
 
     params = {}
     response = await client.post("/api/wallets/transfer", json=params)
@@ -88,11 +88,11 @@ async def test_failed_wallet_transfer_wallets_are_equal(
     """Test failed wallet transfer (Wallets are equal)."""
 
     user_repo = UserRepository(db=test_db)
-    base_user_1 = await user_factory.create()
-    wallet_1 = await wallet_factory.create(user_id=base_user_1.id)
+    base_user_1 = user_factory.create()
+    wallet_1 = wallet_factory.create(user=base_user_1)
 
-    base_user_2 = await user_factory.create()
-    await wallet_factory.create(user_id=base_user_2.id)
+    base_user_2 = user_factory.create()
+    wallet_factory.create(user=base_user_2)
 
     params = {
         "wallet_from": wallet_1.id,
@@ -116,11 +116,11 @@ async def test_failed_wallet_transfer_wallets_not_enough_resources(
     """Test failed wallet transfer (Wallets are equal)."""
 
     user_repo = UserRepository(db=test_db)
-    base_user_1 = await user_factory.create()
-    wallet_1 = await wallet_factory.create(user_id=base_user_1.id)
+    base_user_1 = user_factory.create()
+    wallet_1 = wallet_factory.create(user=base_user_1)
 
-    base_user_2 = await user_factory.create()
-    wallet_2 = await wallet_factory.create(user_id=base_user_2.id)
+    base_user_2 = user_factory.create()
+    wallet_2 = wallet_factory.create(user=base_user_2)
 
     params = {
         "wallet_from": wallet_1.id,

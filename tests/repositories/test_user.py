@@ -23,7 +23,7 @@ async def test_failed_user_creation_user_exists(test_db, user_factory):
     """Test failed user creation (user already exists)"""
 
     repository = UserRepository(db=test_db)
-    await user_factory.create(email="example@mail.com")
+    user_factory(email="example@mail.com")
 
     with pytest.raises(UniqueViolationError):
         await repository.create("example@mail.com")
@@ -44,9 +44,8 @@ async def test_success_user_by_id_receiving(test_db, user_factory, wallet_factor
     """Test success user receiving with user id"""
 
     repository = UserRepository(db=test_db)
-    # user_id = await user_factory.create(email="example@mail.com")
-    factory_user = await user_factory.create(email="example@mail.com")
-    wallet = await wallet_factory.create(user_id=factory_user.id, balance=Decimal("100"))
+    factory_user = user_factory.create(email="example@mail.com")
+    wallet = wallet_factory.create(user=factory_user, balance=Decimal("100"))
 
     user = await repository.get_by_id(factory_user.id)
     assert user is not None

@@ -13,14 +13,12 @@ async def test_success_user_creation(client):
 
 
 @pytest.mark.asyncio
-async def test_failed_user_creation_user_exists(client, test_db):
+async def test_failed_user_creation_user_exists(client, user_factory):
     """Test failed user creation (user already exists)."""
 
-    query = "insert into users(email) values (:email)"
-    values = {"email": "example@mail.com"}
-    await test_db.execute(query=query, values=values)
+    user = user_factory()
 
-    res = await client.post("/api/users", json={"email": "example@mail.com"})
+    res = await client.post("/api/users", json={"email": user.email})
     assert res.status_code == 400
     assert res.json().get("detail") == "User with this email already exists."
 
@@ -49,7 +47,7 @@ async def test_failed_user_creation_email_not_valid(client):
 async def test_success_user_enroll(client, wallet_factory):
     """Test success user money enroll."""
 
-    wallet = await wallet_factory.create()
+    wallet = wallet_factory.create()
     res = await client.put(f"/api/users/{wallet.user_id}/enroll", json={"amount": 10})
     assert res.status_code == 200
     json_response = res.json()
@@ -68,7 +66,7 @@ async def test_failed_user_enroll(client):
 async def test_failed_user_enroll_zero_amount(client, wallet_factory):
     """Test failed user money enroll (amount is zero)."""
 
-    wallet = await wallet_factory.create()
+    wallet = wallet_factory.create()
     res = await client.put(f"/api/users/{wallet.user_id}/enroll", json={"amount": 0})
     assert res.status_code == 422
 
@@ -77,7 +75,7 @@ async def test_failed_user_enroll_zero_amount(client, wallet_factory):
 async def test_failed_user_enroll_no_wallet(client, user_factory):
     """Test failed user money enroll (user has no walled)."""
 
-    user = await user_factory.create()
+    user = user_factory.create()
 
     res = await client.put(f"/api/users/{user.id}/enroll", json={"amount": 10})
     assert res.status_code == 400
@@ -87,7 +85,7 @@ async def test_failed_user_enroll_no_wallet(client, user_factory):
 async def test_failed_user_enroll_wrong_amount_type(client, wallet_factory):
     """Test failed user money enroll (wrong amount type)."""
 
-    wallet = await wallet_factory.create()
+    wallet = wallet_factory.create()
 
     res = await client.put(f"/api/users/{wallet.user_id}/enroll", json={"amount": "abc"})
     assert res.status_code == 422

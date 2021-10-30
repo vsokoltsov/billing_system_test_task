@@ -1,77 +1,76 @@
-import inspect
 from decimal import Decimal
 
 import factory
-from pydantic import BaseModel
+import sqlalchemy as sa
+from factory.alchemy import SQLAlchemyModelFactory
+from faker import Faker
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import as_declarative
+from sqlalchemy.orm import scoped_session, sessionmaker
 
-from app.adapters.sql.db import get_db
+from app import settings
 from app.adapters.sql.models import users, wallets
 from app.entities.currency import CurrencyEnum
-from app.entities.user import BaseUser
-from app.entities.wallet import WalletEntity
+
+ENGINE = create_engine(settings.BILLING_DB_DSN)
+SESSION = scoped_session(
+    sessionmaker(
+        bind=ENGINE,
+        autocommit=True,
+        autoflush=True,
+    ),
+)
 
 
-class SQLAlchemyCoreFactory(factory.Factory):
-    """Implementation of factory for SQLAlchemy core"""
-
-    class Meta:
-        """Metaclass for SQLAlchemy core"""
-
-        abstract = True
-
-    @classmethod
-    def _create(cls, model_class, *args, **kwargs):
-        """creates new instance of table"""
-
-        async def create_coro(**kwargs):
-            """Create instance for async/await"""
-
-            _db = get_db()
-            schema = kwargs.pop("schema", None)
-            for key, value in kwargs.items():
-                if inspect.iscoroutine(value):
-                    kwargs[key] = await kwargs[key]
-                if issubclass(kwargs[key].__class__, BaseModel):
-                    kwargs[key] = kwargs[key].id
-
-            object_id = await _db.execute(
-                query=model_class.insert().returning(model_class.c.id), values=kwargs
-            )
-            if schema:
-                obj_raw = await _db.fetch_one(
-                    model_class.select().where(model_class.c.id == object_id)
-                )
-                return schema(**obj_raw)
-            return object_id
-
-        return create_coro(*args, **kwargs)
+@as_declarative()
+class Base:
+    """Base ORM class"""
 
 
-class UserFactory(SQLAlchemyCoreFactory):
+class User(Base):
+    """ORM based class for user factory"""
+
+    __table__ = users
+
+
+class Wallet(Base):
+    """ORM based class for wallet factory"""
+
+    __table__ = wallets
+
+    user = sa.orm.relationship("User")
+
+
+fake_data = Faker()
+
+
+class UserFactory(SQLAlchemyModelFactory):
     """Factory for users table"""
-
-    schema = BaseUser
 
     class Meta:
         """Meta for users factory"""
 
-        model = users
+        model = User
+        sqlalchemy_session = SESSION
+        sqlalchemy_session_persistence = "flush"
+        sqlalchemy_get_or_create = ("id",)
 
-    id = factory.Sequence(lambda i: i + 1)
-    email = factory.LazyAttribute(lambda o: f"{o.id}@example.com")
+    id = factory.Sequence(lambda n: n + 1)
+    email = factory.LazyAttribute(lambda _: fake_data.email())
 
 
-class WalletFactory(SQLAlchemyCoreFactory):
+class WalletFactory(SQLAlchemyModelFactory):
     """Factory for wallets table"""
-
-    schema = WalletEntity
 
     class Meta:
         """Meta for wallets factory"""
 
-        model = wallets
+        model = Wallet
+        sqlalchemy_session = SESSION
+        sqlalchemy_session_persistence = "flush"
+        sqlalchemy_get_or_create = ("id",)
 
     id = factory.Sequence(lambda n: n + 1)
-    user_id = factory.SubFactory(UserFactory)
+    user = factory.SubFactory(UserFactory)
     balance = Decimal("100.00")
     currency = CurrencyEnum.USD.value

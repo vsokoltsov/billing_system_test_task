@@ -66,6 +66,7 @@ httpx = "^0.20.0"
 requests = "^2.26.0"
 bandit = "^1.7.0"
 mock = "^4.0.3"
+Faker = "^9.7.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

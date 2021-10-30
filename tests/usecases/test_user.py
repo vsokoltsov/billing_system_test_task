@@ -137,7 +137,7 @@ async def test_failed_user_create_usecase_user_retrieve(
 ):
     """Test failed user create usecase. (wallet operation was not created)"""
 
-    user = await user_factory.create()
+    user = user_factory.create()
     user_repository_mock.create.return_value = user.id
     user_repository_mock.get_by_id.side_effect = [ValueError("Error database connection")]
 

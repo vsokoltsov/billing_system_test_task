@@ -11,7 +11,7 @@ from app.repositories.wallet import WalletRepository
 async def test_success_wallet_creation(test_db, user_factory):
     """Test success wallet creation."""
 
-    user = await user_factory.create()
+    user = user_factory.create()
     wallets_count = await test_db.execute("select count(*) from wallets")
     repository = WalletRepository(db=test_db)
     await repository.create(user_id=user.id)
@@ -32,7 +32,7 @@ async def test_failed_wallet_creation(test_db):
 async def test_success_receiving_wallet_by_user_id(test_db, wallet_factory):
     """Test success receiving wallet by user id."""
 
-    wallet = await wallet_factory.create()
+    wallet = wallet_factory.create()
     repository = WalletRepository(db=test_db)
     wallet: WalletEntity = await repository.get_by_user_id(user_id=wallet.user_id)
     assert wallet is not None
@@ -52,7 +52,7 @@ async def test_failed_receiving_wallet_by_user_id(test_db):
 async def test_success_receiving_wallet_by_id(test_db, wallet_factory):
     """Test success receiving wallet by id."""
 
-    wallet = await wallet_factory.create()
+    wallet = wallet_factory.create()
     repository = WalletRepository(db=test_db)
     wallet: WalletEntity = await repository.get_by_id(wallet_id=wallet.id)
     assert wallet is not None
@@ -63,7 +63,7 @@ async def test_success_receiving_wallet_by_id(test_db, wallet_factory):
 async def test_failed_receiving_wallet_by_id(test_db, wallet_factory):
     """Test failed receiving wallet by wallet id. (wallet does not exists)"""
 
-    wallet = await wallet_factory.create()
+    wallet = wallet_factory.create()
     repository = WalletRepository(db=test_db)
     wallet = await repository.get_by_id(wallet_id=1)
     assert wallet is None
@@ -73,7 +73,7 @@ async def test_failed_receiving_wallet_by_id(test_db, wallet_factory):
 async def test_success_wallet_enroll(test_db, wallet_factory):
     """Test success wallet enroll."""
 
-    wallet = await wallet_factory.create()
+    wallet = wallet_factory.create()
     repository = WalletRepository(db=test_db)
     old_wallet = await repository.get_by_user_id(user_id=wallet.user_id)
     await repository.enroll(wallet_id=wallet.id, amount=Decimal("10.0"))
@@ -94,8 +94,8 @@ async def test_failed_wallet_enroll(test_db):
 async def test_success_wallet_transfer(test_db, wallet_factory):
     """Test success transfer between wallets function."""
 
-    wallet_1 = await wallet_factory.create()
-    wallet_2 = await wallet_factory.create()
+    wallet_1 = wallet_factory()
+    wallet_2 = wallet_factory()
     repository = WalletRepository(db=test_db)
     await repository.transfer(
         source_wallet_id=wallet_1.id,
@@ -115,7 +115,7 @@ async def test_failed_wallet_transfer(test_db, wallet_factory):
     (source wallet does not exist).
     """
 
-    wallet_2 = await wallet_factory.create()
+    wallet_2 = wallet_factory.create()
     repository = WalletRepository(db=test_db)
     with pytest.raises(ValueError):
         await repository.transfer(
