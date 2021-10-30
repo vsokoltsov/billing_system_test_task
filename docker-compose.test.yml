@@ -12,6 +12,7 @@ services:
     #   - ./postgresql.conf:/var/lib/postgresql/data/postgresql.conf
     networks:
       - test
+    volumes: []
 
 networks:
   test:

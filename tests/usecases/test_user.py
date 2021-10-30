@@ -1,5 +1,6 @@
 import pytest
 
+from app.adapters.sql.tx import SQLTransactionManager
 from app.repositories.users import UserRepository
 from app.repositories.wallet import WalletRepository
 from app.repositories.wallet_operations import WalletOperationRepository
@@ -10,12 +11,13 @@ from app.usecases.user import UserUsecase
 async def test_success_user_create_usecase(test_db):
     """Test success user create usecase."""
 
+    tx_manager = SQLTransactionManager(db=test_db)
     user_repo = UserRepository(db=test_db)
     wallet_repo = WalletRepository(db=test_db)
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = UserUsecase(
-        app_db=test_db,
+        tx_manager=tx_manager,
         user_repo=user_repo,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repo,
@@ -42,12 +44,13 @@ async def test_success_user_create_usecase(test_db):
 async def test_failed_user_create_usecase_user(test_db):
     """Test failed user create usecase. (user was not created)"""
 
+    tx_manager = SQLTransactionManager(db=test_db)
     user_repo = UserRepository(db=test_db)
     wallet_repo = WalletRepository(db=test_db)
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = UserUsecase(
-        app_db=test_db,
+        tx_manager=tx_manager,
         user_repo=user_repo,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repo,
@@ -60,12 +63,13 @@ async def test_failed_user_create_usecase_user(test_db):
 async def test_failed_user_create_usecase_wallet(test_db, wallet_repository_mock):
     """Test failed user create usecase. (wallet was not created)"""
 
+    tx_manager = SQLTransactionManager(db=test_db)
     wallet_repository_mock.create.side_effect = [ValueError("wallet was not created")]
     user_repo = UserRepository(db=test_db)
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = UserUsecase(
-        app_db=test_db,
+        tx_manager=tx_manager,
         user_repo=user_repo,
         wallet_repo=wallet_repository_mock,
         wallet_operation_repo=wallet_operation_repo,
@@ -78,12 +82,13 @@ async def test_failed_user_create_usecase_wallet(test_db, wallet_repository_mock
 async def test_failed_user_create_usecase_rollback_previous(test_db, wallet_repository_mock):
     """Test failed user create usecase. (wallet was not created)"""
 
+    tx_manager = SQLTransactionManager(db=test_db)
     wallet_repository_mock.create.side_effect = [ValueError("wallet was not created")]
     user_repo = UserRepository(db=test_db)
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = UserUsecase(
-        app_db=test_db,
+        tx_manager=tx_manager,
         user_repo=user_repo,
         wallet_repo=wallet_repository_mock,
         wallet_operation_repo=wallet_operation_repo,
@@ -105,11 +110,12 @@ async def test_failed_user_create_usecase_wallet_operation(
     wallet_operation_repository_mock.create.side_effect = [
         ValueError("wallet operation was not created")
     ]
+    tx_manager = SQLTransactionManager(db=test_db)
     user_repo = UserRepository(db=test_db)
     wallet_repo = WalletRepository(db=test_db)
 
     usecase = UserUsecase(
-        app_db=test_db,
+        tx_manager=tx_manager,
         user_repo=user_repo,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repository_mock,
@@ -135,11 +141,12 @@ async def test_failed_user_create_usecase_user_retrieve(
     user_repository_mock.create.return_value = user.id
     user_repository_mock.get_by_id.side_effect = [ValueError("Error database connection")]
 
+    tx_manager = SQLTransactionManager(db=test_db)
     wallet_repo = WalletRepository(db=test_db)
     wallet_operation_repo = WalletOperationRepository(db=test_db)
 
     usecase = UserUsecase(
-        app_db=test_db,
+        tx_manager=tx_manager,
         user_repo=user_repository_mock,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repo,

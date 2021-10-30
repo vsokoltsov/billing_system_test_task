@@ -1,16 +1,15 @@
 import asyncio
-from decimal import Decimal
 from typing import AsyncGenerator
 
 import pytest
+from databases.core import Database
 from httpx import AsyncClient
 from mock import AsyncMock
 
 from app.adapters.sql.db import connect_db, disconnect_db, get_db
 from app.adapters.sql.models import users, wallet_operations, wallets
+from app.adapters.sql.tx import SQLTransactionManager
 from app.api import users_routes, wallets_routes
-from app.entities.user import BaseUser
-from app.entities.wallet import WalletEntity
 
 # pylint: disable=no-name-in-module
 from app.main import init_app
@@ -26,9 +25,15 @@ from tests.factories import UserFactory, WalletFactory
 async def prepare_db(test_db):
     """Delete previous records from database"""
 
+    await test_db.execute(query="select pg_advisory_unlock_all()")
+
     await test_db.execute(query=users.delete())
     await test_db.execute(query=wallets.delete())
     await test_db.execute(query=wallet_operations.delete())
+
+    # Unlock all advisory locks
+    await test_db.execute(query="select pg_advisory_unlock_all()")
+
     yield
 
 
@@ -42,15 +47,20 @@ def event_loop():
 
 
 @pytest.fixture
-async def test_db():
+def test_db_instance() -> Database:
+    """Return instance of encoding.Database"""
+    return get_db()
+
+
+@pytest.fixture
+async def test_db(test_db_instance):
     """Retrieve instance of test database."""
 
-    _db = get_db()
-    if not _db.is_connected:
-        await _db.connect()
-    yield _db
-    if _db.is_connected:
-        await _db.disconnect()
+    if not test_db_instance.is_connected:
+        await test_db_instance.connect()
+    yield test_db_instance
+    if test_db_instance.is_connected:
+        await test_db_instance.disconnect()
 
 
 @pytest.fixture
@@ -65,33 +75,6 @@ def wallet_factory():
     """WalletFactory as pytest factory"""
 
     return WalletFactory
-
-
-@pytest.fixture
-async def fake_base_user(test_db) -> BaseUser:
-    """Return BaseUser schema."""
-
-    repository = UserRepository(db=test_db)
-    user_id = await repository.create(email="example@mail.com")
-    user_raw = await test_db.fetch_one(
-        query="select id, email from users where id = :id", values={"id": user_id}
-    )
-    return BaseUser(**user_raw)
-
-
-@pytest.fixture
-async def fake_wallet(test_db, fake_base_user) -> WalletEntity:
-    """Return wallet entitiy."""
-
-    wallet_id = await test_db.execute(
-        query="insert into wallets(user_id, balance) values(:user_id, :balance) returning id",
-        values={"user_id": fake_base_user.id, "balance": Decimal("10.0")},
-    )
-    wallet_raw = await test_db.fetch_one(
-        query="select id, user_id, balance, currency from wallets where id = :id",
-        values={"id": wallet_id},
-    )
-    return WalletEntity(**wallet_raw)
 
 
 @pytest.fixture
@@ -116,19 +99,22 @@ async def wallet_operation_repository_mock() -> AsyncMock:
 
 
 @pytest.fixture
-async def client(test_db) -> AsyncGenerator:
-    """Cleint fixture for API tests."""
+async def client(test_db_instance) -> AsyncGenerator:
+    """Client fixture for API tests."""
+
+    test_db = test_db_instance
+    tx_manager = SQLTransactionManager(db=test_db)
     user_repo = UserRepository(db=test_db)
     wallet_repo = WalletRepository(db=test_db)
     wallet_operation_repo = WalletOperationRepository(db=test_db)
     user_usecase = UserUsecase(
-        app_db=test_db,
+        tx_manager=tx_manager,
         user_repo=user_repo,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repo,
     )
     wallet_usecase = WalletUsecase(
-        app_db=test_db,
+        tx_manager=tx_manager,
         user_repo=user_repo,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repo,

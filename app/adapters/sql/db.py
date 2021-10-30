@@ -2,9 +2,7 @@ from databases import Database
 
 from app import settings
 
-_db = Database(
-    settings.BILLING_DB_DSN, force_rollback=settings.FORCE_ROLLBACK_TRANSACTION  # type: ignore
-)
+_db = Database(settings.BILLING_DB_DSN)  # type: ignore
 
 
 async def connect_db():

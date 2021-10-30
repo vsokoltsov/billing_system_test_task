@@ -5,6 +5,7 @@ from fastapi import APIRouter, FastAPI
 
 from app import settings
 from app.adapters.sql.db import connect_db, disconnect_db, get_db
+from app.adapters.sql.tx import SQLTransactionManager
 from app.api import users_routes, wallets_routes
 from app.repositories.users import UserRepository
 from app.repositories.wallet import WalletRepository
@@ -36,17 +37,18 @@ def run_app():
     """Run application instance"""
 
     _db = get_db()
+    tx_manager = SQLTransactionManager(db=_db)
     user_repo = UserRepository(db=_db)
     wallet_repo = WalletRepository(db=_db)
     wallet_operation_repo = WalletOperationRepository(db=_db)
     user_usecase = UserUsecase(
-        app_db=_db,
+        tx_manager=tx_manager,
         user_repo=user_repo,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repo,
     )
     wallet_usecase = WalletUsecase(
-        app_db=_db,
+        tx_manager=tx_manager,
         user_repo=user_repo,
         wallet_repo=wallet_repo,
         wallet_operation_repo=wallet_operation_repo,
